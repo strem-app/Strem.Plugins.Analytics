@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Version>0.0.0</Version>
+        <IsPackable>false</IsPackable>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Blazor-ApexCharts" Version="0.9.16-beta" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.8" />       
+        <PackageReference Include="Strem.Infrastructure" Version="0.7.206" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Components" />
+      <Folder Include="Extensions" />
+      <Folder Include="Flows" />
+      <Folder Include="Variables" />
+    </ItemGroup>
+
+</Project>

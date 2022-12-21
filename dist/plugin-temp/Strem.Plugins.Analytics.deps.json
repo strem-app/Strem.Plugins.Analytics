@@ -1,0 +1,531 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "Strem.Plugins.Analytics/0.0.0": {
+        "dependencies": {
+          "Microsoft.AspNetCore.Components.Web": "6.0.8",
+          "Strem.Infrastructure": "0.7.206"
+        },
+        "runtime": {
+          "Strem.Plugins.Analytics.dll": {}
+        }
+      },
+      "Glob/1.1.9": {
+        "runtime": {
+          "lib/netstandard2.0/Glob.dll": {
+            "assemblyVersion": "1.1.9.0",
+            "fileVersion": "1.1.9.0"
+          }
+        }
+      },
+      "LiteDB/5.0.12": {
+        "runtime": {
+          "lib/netstandard2.0/LiteDB.dll": {
+            "assemblyVersion": "5.0.12.0",
+            "fileVersion": "5.0.12.0"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Authorization/6.0.8": {
+        "dependencies": {
+          "Microsoft.AspNetCore.Metadata": "6.0.8",
+          "Microsoft.Extensions.Logging.Abstractions": "6.0.1",
+          "Microsoft.Extensions.Options": "6.0.0"
+        },
+        "runtime": {
+          "lib/net6.0/Microsoft.AspNetCore.Authorization.dll": {
+            "assemblyVersion": "6.0.0.0",
+            "fileVersion": "6.0.822.36316"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Components/6.0.8": {
+        "dependencies": {
+          "Microsoft.AspNetCore.Authorization": "6.0.8",
+          "Microsoft.AspNetCore.Components.Analyzers": "6.0.8"
+        },
+        "runtime": {
+          "lib/net6.0/Microsoft.AspNetCore.Components.dll": {
+            "assemblyVersion": "6.0.0.0",
+            "fileVersion": "6.0.822.36316"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Components.Analyzers/6.0.8": {},
+      "Microsoft.AspNetCore.Components.Forms/6.0.8": {
+        "dependencies": {
+          "Microsoft.AspNetCore.Components": "6.0.8"
+        },
+        "runtime": {
+          "lib/net6.0/Microsoft.AspNetCore.Components.Forms.dll": {
+            "assemblyVersion": "6.0.0.0",
+            "fileVersion": "6.0.822.36316"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Components.Web/6.0.8": {
+        "dependencies": {
+          "Microsoft.AspNetCore.Components": "6.0.8",
+          "Microsoft.AspNetCore.Components.Forms": "6.0.8",
+          "Microsoft.Extensions.DependencyInjection": "6.0.0",
+          "Microsoft.JSInterop": "6.0.8",
+          "System.IO.Pipelines": "6.0.3"
+        },
+        "runtime": {
+          "lib/net6.0/Microsoft.AspNetCore.Components.Web.dll": {
+            "assemblyVersion": "6.0.0.0",
+            "fileVersion": "6.0.822.36316"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Metadata/6.0.8": {
+        "runtime": {
+          "lib/net6.0/Microsoft.AspNetCore.Metadata.dll": {
+            "assemblyVersion": "6.0.0.0",
+            "fileVersion": "6.0.822.36316"
+          }
+        }
+      },
+      "Microsoft.Extensions.DependencyInjection/6.0.0": {
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "6.0.0",
+          "System.Runtime.CompilerServices.Unsafe": "6.0.0"
+        }
+      },
+      "Microsoft.Extensions.DependencyInjection.Abstractions/6.0.0": {},
+      "Microsoft.Extensions.Logging/2.0.0": {
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "6.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "6.0.1",
+          "Microsoft.Extensions.Options": "6.0.0"
+        }
+      },
+      "Microsoft.Extensions.Logging.Abstractions/6.0.1": {
+        "runtime": {
+          "lib/net6.0/Microsoft.Extensions.Logging.Abstractions.dll": {
+            "assemblyVersion": "6.0.0.0",
+            "fileVersion": "6.0.322.12309"
+          }
+        }
+      },
+      "Microsoft.Extensions.Options/6.0.0": {
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "6.0.0",
+          "Microsoft.Extensions.Primitives": "6.0.0"
+        }
+      },
+      "Microsoft.Extensions.Primitives/6.0.0": {
+        "dependencies": {
+          "System.Runtime.CompilerServices.Unsafe": "6.0.0"
+        }
+      },
+      "Microsoft.JSInterop/6.0.8": {
+        "runtime": {
+          "lib/net6.0/Microsoft.JSInterop.dll": {
+            "assemblyVersion": "6.0.0.0",
+            "fileVersion": "6.0.822.36316"
+          }
+        }
+      },
+      "Newtonsoft.Json/13.0.1": {
+        "runtime": {
+          "lib/netstandard2.0/Newtonsoft.Json.dll": {
+            "assemblyVersion": "13.0.0.0",
+            "fileVersion": "13.0.1.25517"
+          }
+        }
+      },
+      "Persistity/2.0.47": {
+        "dependencies": {
+          "Persistity.Core": "2.0.47"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Persistity.dll": {
+            "assemblyVersion": "2.0.47.0",
+            "fileVersion": "2.0.47.0"
+          }
+        }
+      },
+      "Persistity.Core/2.0.47": {
+        "runtime": {
+          "lib/netstandard2.0/Persistity.Core.dll": {
+            "assemblyVersion": "2.0.47.0",
+            "fileVersion": "2.0.47.0"
+          }
+        }
+      },
+      "Persistity.Flow/2.0.47": {
+        "dependencies": {
+          "Persistity": "2.0.47"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Persistity.Flow.dll": {
+            "assemblyVersion": "2.0.47.0",
+            "fileVersion": "2.0.47.0"
+          }
+        }
+      },
+      "Persistity.Serializers.Json/2.0.47": {
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.1",
+          "Persistity.Core": "2.0.47"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Persistity.Serializers.Json.dll": {
+            "assemblyVersion": "2.0.47.0",
+            "fileVersion": "2.0.47.0"
+          }
+        }
+      },
+      "Serilog/2.10.0": {
+        "runtime": {
+          "lib/netstandard2.1/Serilog.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.10.0.0"
+          }
+        }
+      },
+      "Serilog.Extensions.Logging/3.1.0": {
+        "dependencies": {
+          "Microsoft.Extensions.Logging": "2.0.0",
+          "Serilog": "2.10.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Serilog.Extensions.Logging.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "3.1.0.0"
+          }
+        }
+      },
+      "Serilog.Sinks.Console/4.0.1": {
+        "dependencies": {
+          "Serilog": "2.10.0"
+        },
+        "runtime": {
+          "lib/net5.0/Serilog.Sinks.Console.dll": {
+            "assemblyVersion": "4.0.1.0",
+            "fileVersion": "4.0.1.0"
+          }
+        }
+      },
+      "Serilog.Sinks.File/5.0.0": {
+        "dependencies": {
+          "Serilog": "2.10.0"
+        },
+        "runtime": {
+          "lib/net5.0/Serilog.Sinks.File.dll": {
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.0.0.0"
+          }
+        }
+      },
+      "Strem.Core/0.7.206": {
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "6.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "6.0.1",
+          "Newtonsoft.Json": "13.0.1",
+          "System.Reactive": "5.0.0"
+        },
+        "runtime": {
+          "lib/net6.0/Strem.Core.dll": {
+            "assemblyVersion": "0.7.206.0",
+            "fileVersion": "0.7.206.0"
+          }
+        }
+      },
+      "Strem.Data/0.7.206": {
+        "dependencies": {
+          "LiteDB": "5.0.12",
+          "Strem.Core": "0.7.206"
+        },
+        "runtime": {
+          "lib/net6.0/Strem.Data.dll": {
+            "assemblyVersion": "0.7.206.0",
+            "fileVersion": "0.7.206.0"
+          }
+        }
+      },
+      "Strem.Flows/0.7.206": {
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "6.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "6.0.1",
+          "Newtonsoft.Json": "13.0.1",
+          "Strem.Data": "0.7.206",
+          "System.Reactive": "5.0.0"
+        },
+        "runtime": {
+          "lib/net6.0/Strem.Flows.dll": {
+            "assemblyVersion": "0.7.206.0",
+            "fileVersion": "0.7.206.0"
+          }
+        }
+      },
+      "Strem.Infrastructure/0.7.206": {
+        "dependencies": {
+          "Glob": "1.1.9",
+          "LiteDB": "5.0.12",
+          "Persistity.Flow": "2.0.47",
+          "Persistity.Serializers.Json": "2.0.47",
+          "Serilog.Extensions.Logging": "3.1.0",
+          "Serilog.Sinks.Console": "4.0.1",
+          "Serilog.Sinks.File": "5.0.0",
+          "Strem.Core": "0.7.206",
+          "Strem.Data": "0.7.206",
+          "Strem.Flows": "0.7.206"
+        },
+        "runtime": {
+          "lib/net6.0/Strem.Infrastructure.dll": {
+            "assemblyVersion": "0.7.206.0",
+            "fileVersion": "0.7.206.0"
+          }
+        }
+      },
+      "System.IO.Pipelines/6.0.3": {
+        "runtime": {
+          "lib/net6.0/System.IO.Pipelines.dll": {
+            "assemblyVersion": "6.0.0.0",
+            "fileVersion": "6.0.522.21309"
+          }
+        }
+      },
+      "System.Reactive/5.0.0": {
+        "runtime": {
+          "lib/net5.0/System.Reactive.dll": {
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.0.0.1"
+          }
+        }
+      },
+      "System.Runtime.CompilerServices.Unsafe/6.0.0": {}
+    }
+  },
+  "libraries": {
+    "Strem.Plugins.Analytics/0.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Glob/1.1.9": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-AfK5+ECWYTP7G3AAdnU8IfVj+QpGjrh9GC2mpdcJzCvtQ4pnerAGwHsxJ9D4/RnhDUz2DSzd951O/lQjQby2Sw==",
+      "path": "glob/1.1.9",
+      "hashPath": "glob.1.1.9.nupkg.sha512"
+    },
+    "LiteDB/5.0.12": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-HaOjSIGS9BRm7dw42qcHd5NGYl5wdjsFB31pImt3QQNLKUNEmRAr7ADos5VsujwBc9c4otJgb+G6NA4MlzKyAw==",
+      "path": "litedb/5.0.12",
+      "hashPath": "litedb.5.0.12.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.Authorization/6.0.8": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-rDLMah6FOtFoC5uWDxnevcH/FqEs+APgmTqEvcLj3OU6Y/X8M5ASm/EdlQh6B+Z2XsQW5xu+K8tyn7w7OgOX8A==",
+      "path": "microsoft.aspnetcore.authorization/6.0.8",
+      "hashPath": "microsoft.aspnetcore.authorization.6.0.8.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.Components/6.0.8": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-PB0k59EAiTctVaI5Yq3YHvwodXcsAcXPAn9TWJ9Yz+qrJ1+vuvP9sIBdnDgJKIzKLX6fg6QwKIGoO80B42G+aA==",
+      "path": "microsoft.aspnetcore.components/6.0.8",
+      "hashPath": "microsoft.aspnetcore.components.6.0.8.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.Components.Analyzers/6.0.8": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-87BAjhlq/NEo00EtVc2MzXwaGTfF8q6fbeoefd/u3wN13G0LrCMAt5hUMNeu4Fz4TOz5FbuHUoBopPo7mENTuQ==",
+      "path": "microsoft.aspnetcore.components.analyzers/6.0.8",
+      "hashPath": "microsoft.aspnetcore.components.analyzers.6.0.8.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.Components.Forms/6.0.8": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-AEQspooUSN8X+k1sMLmKIrkKBYBdp6l5mLmrfEze6IurxNbOXFvwmrCrFbtO47fVFm2NHXV1qsBFRNQj9eA8eA==",
+      "path": "microsoft.aspnetcore.components.forms/6.0.8",
+      "hashPath": "microsoft.aspnetcore.components.forms.6.0.8.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.Components.Web/6.0.8": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-I0fkdznezi+Ew76gZKWz3oOuR/joNQy0aCyLYxamvAtKfl5Lr5rNKYEhBSosKe2+iqbpPVGKmcoZsX8c6uvKLA==",
+      "path": "microsoft.aspnetcore.components.web/6.0.8",
+      "hashPath": "microsoft.aspnetcore.components.web.6.0.8.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.Metadata/6.0.8": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-RWENSe/yFqVSSOQuzVUhgJzXIVoF+AQ4N6FOxLM1/FmWWT9Ngdbhrx8LgauuFmz/2yqka6PCjtveiUasjTl/2A==",
+      "path": "microsoft.aspnetcore.metadata/6.0.8",
+      "hashPath": "microsoft.aspnetcore.metadata.6.0.8.nupkg.sha512"
+    },
+    "Microsoft.Extensions.DependencyInjection/6.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-k6PWQMuoBDGGHOQTtyois2u4AwyVcIwL2LaSLlTZQm2CYcJ1pxbt6jfAnpWmzENA/wfrYRI/X9DTLoUkE4AsLw==",
+      "path": "microsoft.extensions.dependencyinjection/6.0.0",
+      "hashPath": "microsoft.extensions.dependencyinjection.6.0.0.nupkg.sha512"
+    },
+    "Microsoft.Extensions.DependencyInjection.Abstractions/6.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-xlzi2IYREJH3/m6+lUrQlujzX8wDitm4QGnUu6kUXTQAWPuZY8i+ticFJbzfqaetLA6KR/rO6Ew/HuYD+bxifg==",
+      "path": "microsoft.extensions.dependencyinjection.abstractions/6.0.0",
+      "hashPath": "microsoft.extensions.dependencyinjection.abstractions.6.0.0.nupkg.sha512"
+    },
+    "Microsoft.Extensions.Logging/2.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-VP10syWV/vxYYMKgZ2eDESmUsz3gPxvBn5J6tkVN8lI4M+dF43RN8fWsEPbcAneDmZrHl3Pv23z05nmyGkJlpg==",
+      "path": "microsoft.extensions.logging/2.0.0",
+      "hashPath": "microsoft.extensions.logging.2.0.0.nupkg.sha512"
+    },
+    "Microsoft.Extensions.Logging.Abstractions/6.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-dzB2Cgg+JmrouhjkcQGzSFjjvpwlq353i8oBQO2GWNjCXSzhbtBRUf28HSauWe7eib3wYOdb3tItdjRwAdwCSg==",
+      "path": "microsoft.extensions.logging.abstractions/6.0.1",
+      "hashPath": "microsoft.extensions.logging.abstractions.6.0.1.nupkg.sha512"
+    },
+    "Microsoft.Extensions.Options/6.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-dzXN0+V1AyjOe2xcJ86Qbo233KHuLEY0njf/P2Kw8SfJU+d45HNS2ctJdnEnrWbM9Ye2eFgaC5Mj9otRMU6IsQ==",
+      "path": "microsoft.extensions.options/6.0.0",
+      "hashPath": "microsoft.extensions.options.6.0.0.nupkg.sha512"
+    },
+    "Microsoft.Extensions.Primitives/6.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-9+PnzmQFfEFNR9J2aDTfJGGupShHjOuGw4VUv+JB044biSHrnmCIMD+mJHmb2H7YryrfBEXDurxQ47gJZdCKNQ==",
+      "path": "microsoft.extensions.primitives/6.0.0",
+      "hashPath": "microsoft.extensions.primitives.6.0.0.nupkg.sha512"
+    },
+    "Microsoft.JSInterop/6.0.8": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-xdqTaQaofY1ypf2mki9IeWaUZwnBM+smdplCcjLVcGcxqZdUf+rWdQh1Vt4fGkF+2Hi56Y3jwOtAQUbfv7T44Q==",
+      "path": "microsoft.jsinterop/6.0.8",
+      "hashPath": "microsoft.jsinterop.6.0.8.nupkg.sha512"
+    },
+    "Newtonsoft.Json/13.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ppPFpBcvxdsfUonNcvITKqLl3bqxWbDCZIzDWHzjpdAHRFfZe0Dw9HmA0+za13IdyrgJwpkDTDA9fHaxOrt20A==",
+      "path": "newtonsoft.json/13.0.1",
+      "hashPath": "newtonsoft.json.13.0.1.nupkg.sha512"
+    },
+    "Persistity/2.0.47": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-J4sbVULQx0xPGuVfRFr/xADIpC1pNLh+7PGUpqw0qn5E6bFR1V/7cVKs8bgG9obMxHpZtwbJp6+SU51nB49ISg==",
+      "path": "persistity/2.0.47",
+      "hashPath": "persistity.2.0.47.nupkg.sha512"
+    },
+    "Persistity.Core/2.0.47": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-YC7JCG/5EDuwszk6KTONq1ArAMKNvTC7v74andgyG04+WVs9l5KsIM6wTPZNuu5eujvZT+hZNbIPDVDsaZW9OA==",
+      "path": "persistity.core/2.0.47",
+      "hashPath": "persistity.core.2.0.47.nupkg.sha512"
+    },
+    "Persistity.Flow/2.0.47": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-RIRBXoka7nsXqOP7abzk/DKwwYFskMHC2oOtwD73rXKxW/kM6AOqRfi4JxLNPREIqsRe+1Vum2t2ywYL7kEK8g==",
+      "path": "persistity.flow/2.0.47",
+      "hashPath": "persistity.flow.2.0.47.nupkg.sha512"
+    },
+    "Persistity.Serializers.Json/2.0.47": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-lNPix/l55XwnTIX3FS59HcD8VRGXSmboC9IxzAgfzF93m1PsovzJCPGPxgWs1LE6G2khDeaSTda/NNq0LGFPqA==",
+      "path": "persistity.serializers.json/2.0.47",
+      "hashPath": "persistity.serializers.json.2.0.47.nupkg.sha512"
+    },
+    "Serilog/2.10.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-+QX0hmf37a0/OZLxM3wL7V6/ADvC1XihXN4Kq/p6d8lCPfgkRdiuhbWlMaFjR9Av0dy5F0+MBeDmDdRZN/YwQA==",
+      "path": "serilog/2.10.0",
+      "hashPath": "serilog.2.10.0.nupkg.sha512"
+    },
+    "Serilog.Extensions.Logging/3.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-IWfem7wfrFbB3iw1OikqPFNPEzfayvDuN4WP7Ue1AVFskalMByeWk3QbtUXQR34SBkv1EbZ3AySHda/ErDgpcg==",
+      "path": "serilog.extensions.logging/3.1.0",
+      "hashPath": "serilog.extensions.logging.3.1.0.nupkg.sha512"
+    },
+    "Serilog.Sinks.Console/4.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-apLOvSJQLlIbKlbx+Y2UDHSP05kJsV7mou+fvJoRGs/iR+jC22r8cuFVMjjfVxz/AD4B2UCltFhE1naRLXwKNw==",
+      "path": "serilog.sinks.console/4.0.1",
+      "hashPath": "serilog.sinks.console.4.0.1.nupkg.sha512"
+    },
+    "Serilog.Sinks.File/5.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-uwV5hdhWPwUH1szhO8PJpFiahqXmzPzJT/sOijH/kFgUx+cyoDTMM8MHD0adw9+Iem6itoibbUXHYslzXsLEAg==",
+      "path": "serilog.sinks.file/5.0.0",
+      "hashPath": "serilog.sinks.file.5.0.0.nupkg.sha512"
+    },
+    "Strem.Core/0.7.206": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-HQ/SGgqiuYePyl4jS6VknDBZlwNyoeIw+oSIy7UNtjprJk7zax5cCMgOBEiBzVmXH92pAkw7ebP897pa3Mqv8A==",
+      "path": "strem.core/0.7.206",
+      "hashPath": "strem.core.0.7.206.nupkg.sha512"
+    },
+    "Strem.Data/0.7.206": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-l2bM1xMKbHlnybBAbww/PAfzIx9mXJiMC7idX/PWWC/2FF4RK+K/r8U+DSQSMZMReYqBFs+Mbq7G5zRnWfZN+A==",
+      "path": "strem.data/0.7.206",
+      "hashPath": "strem.data.0.7.206.nupkg.sha512"
+    },
+    "Strem.Flows/0.7.206": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-LkdHN3X1IUvv/Mmz0g8+gIF65RbPNj6jllUu3R1qv8COOw9rYp+z9eUnnipz1+Dc4qD5qMRB/t18uKGr0NMb4g==",
+      "path": "strem.flows/0.7.206",
+      "hashPath": "strem.flows.0.7.206.nupkg.sha512"
+    },
+    "Strem.Infrastructure/0.7.206": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-MIYET1kscXAe5PH3J+huJ3cHgHpZBA7dAYI6jS6ws/t/RLWrepOBqb7JVEQg9Zy20NjDzrP0vhikgt/Y/pf3wQ==",
+      "path": "strem.infrastructure/0.7.206",
+      "hashPath": "strem.infrastructure.0.7.206.nupkg.sha512"
+    },
+    "System.IO.Pipelines/6.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-ryTgF+iFkpGZY1vRQhfCzX0xTdlV3pyaTTqRu2ETbEv+HlV7O6y7hyQURnghNIXvctl5DuZ//Dpks6HdL/Txgw==",
+      "path": "system.io.pipelines/6.0.3",
+      "hashPath": "system.io.pipelines.6.0.3.nupkg.sha512"
+    },
+    "System.Reactive/5.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-erBZjkQHWL9jpasCE/0qKAryzVBJFxGHVBAvgRN1bzM0q2s1S4oYREEEL0Vb+1kA/6BKb5FjUZMp5VXmy+gzkQ==",
+      "path": "system.reactive/5.0.0",
+      "hashPath": "system.reactive.5.0.0.nupkg.sha512"
+    },
+    "System.Runtime.CompilerServices.Unsafe/6.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-/iUeP3tq1S0XdNNoMz5C9twLSrM/TH+qElHkXWaPvuNOt+99G75NrV0OS2EqHx5wMN7popYjpc8oTjC1y16DLg==",
+      "path": "system.runtime.compilerservices.unsafe/6.0.0",
+      "hashPath": "system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512"
+    }
+  }
+}

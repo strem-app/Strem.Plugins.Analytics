@@ -1,0 +1,50 @@
+﻿@page "/analytics"
+@using Strem.Plugins.Analytics.Services.Repositories
+
+@inject IStreamInteractionRepository InteractionRepository
+@inject IStreamMetricRepository MetricRepository
+
+<div class="container is-fluid">
+    <ErrorBoundary>
+        <ChildContent>
+            <h3 class="title is-3">Analytics</h3>
+            <div class="box has-background-grey-dark">
+                <h4 class="title is-4">Interactions</h4>
+                <ul>
+                    @foreach (var interaction in InteractionRepository.GetAll())
+                    {
+                        <li>
+                            <span>@interaction.InteractionType</span>
+                            <span>@interaction.PlatformContext</span>
+                            <span>@interaction.SourceContext</span>
+                            <span>@interaction.UserContext</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+            <div class="box has-background-grey-dark">
+                <h4 class="title is-4">Metrics</h4>
+                <ul>
+                    @foreach (var metrics in MetricRepository.GetAll())
+                    {
+                        <li>
+                            <span>@metrics.MetricType</span>
+                            <span>@metrics.MetricValue</span>
+                            <span>@metrics.PlatformContext</span>
+                            <span>@metrics.SourceContext</span>
+                            <span>@metrics.UserContext</span>
+                        </li>
+                    }
+                </ul>
+            </div>
+            
+        </ChildContent>
+        <ErrorContent>
+            <TheSkyIsFalling/>
+        </ErrorContent>
+    </ErrorBoundary>
+</div>
+
+@code {
+
+}

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.8" />
+        <PackageReference Include="Strem.Core" Version="0.7.206" />
+        <PackageReference Include="Strem.Flows" Version="0.7.206" />
+        <PackageReference Include="Strem.Twitch" Version="0.7.206" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Strem.Plugins.Analytics\Strem.Plugins.Analytics.csproj" />
+    </ItemGroup>
+
+</Project>
