@@ -12,7 +12,7 @@ public class GetInteractionsQuery : IBsonQuery
     public DateTime EndPeriod { get; }
     public IReadOnlyCollection<string> InteractionTypes { get; }
 
-    public GetInteractionsQuery(string sourceContext, string platformContext, DateTime startPeriod, DateTime endPeriod, IReadOnlyCollection<string> interactionTypes)
+    public GetInteractionsQuery(string sourceContext, string platformContext, DateTime startPeriod, DateTime endPeriod, IReadOnlyCollection<string> interactionTypes = null)
     {
         SourceContext = sourceContext;
         PlatformContext = platformContext;
@@ -23,13 +23,19 @@ public class GetInteractionsQuery : IBsonQuery
 
     public IEnumerable<BsonDocument> Query(ILiteQueryable<BsonDocument> queryableDocuments)
     {
-        return queryableDocuments
+        var queryable = queryableDocuments
             .Where(x =>
                 x[nameof(StreamInteraction.PlatformContext)] == PlatformContext &&
                 x[nameof(StreamInteraction.SourceContext)] == SourceContext &&
-                InteractionTypes.Contains(x[nameof(StreamInteraction.InteractionType)].AsString) &&
                 x[nameof(StreamInteraction.InteractionDateTime)] >= StartPeriod.ToString("O") &&
-                x[nameof(StreamInteraction.InteractionDateTime)] <= EndPeriod.ToString("O"))
-            .ToEnumerable();
+                x[nameof(StreamInteraction.InteractionDateTime)] <= EndPeriod.ToString("O"));
+
+        if (InteractionTypes is { Count: >= 0 })
+        {
+            queryable = queryable.Where(x =>
+                InteractionTypes.Contains(x[nameof(StreamInteraction.InteractionType)].AsString));
+        }
+            
+        return queryable.ToEnumerable();
     }
 }

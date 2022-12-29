@@ -12,7 +12,7 @@ public class GetMetricsQuery : IBsonQuery
     public DateTime EndPeriod { get; }
     public IReadOnlyCollection<string> MetricTypes { get; }
 
-    public GetMetricsQuery(string sourceContext, string platformContext, DateTime startPeriod, DateTime endPeriod, IReadOnlyCollection<string> metricTypes)
+    public GetMetricsQuery(string sourceContext, string platformContext, DateTime startPeriod, DateTime endPeriod, IReadOnlyCollection<string> metricTypes = null)
     {
         SourceContext = sourceContext;
         PlatformContext = platformContext;
@@ -23,13 +23,19 @@ public class GetMetricsQuery : IBsonQuery
 
     public IEnumerable<BsonDocument> Query(ILiteQueryable<BsonDocument> queryableDocuments)
     {
-        return queryableDocuments
+        var queryable = queryableDocuments
             .Where(x =>
                 x[nameof(StreamMetric.PlatformContext)] == PlatformContext &&
                 x[nameof(StreamMetric.SourceContext)] == SourceContext &&
-                MetricTypes.Contains(x[nameof(StreamMetric.MetricType)].AsString) &&
                 x[nameof(StreamMetric.MetricDateTime)] >= StartPeriod.ToString("O") &&
-                x[nameof(StreamMetric.MetricDateTime)] <= EndPeriod.ToString("O"))
-            .ToEnumerable();
+                x[nameof(StreamMetric.MetricDateTime)] <= EndPeriod.ToString("O"));
+            
+        if (MetricTypes is { Count: >= 0 })
+        {
+            queryable = queryable.Where(x =>
+                MetricTypes.Contains(x[nameof(StreamMetric.MetricType)].AsString));
+        }
+        
+        return queryable.ToEnumerable();
     }
 }

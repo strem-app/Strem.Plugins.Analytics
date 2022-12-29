@@ -7,6 +7,7 @@
 
 <div class="@ChartContainerStyles">
     
+    @*
     <div class="box has-background-info has-text-white">
         <div class="columns">
             <div class="column">
@@ -19,6 +20,7 @@
             </div>
         </div>
     </div>
+    *@
     
     @{ var data = GetMetrics(); }
     @if (data.Count == 0)
@@ -27,20 +29,25 @@
     {
         <div class="box">
             <ApexChart TItem="StreamMetric" Title="Stream Metrics" Height="400" OnZoomed="ResetBreakdownPeriod" XAxisType="XAxisType.Datetime">
-                <ApexPointSeries TItem="StreamMetric" Items="data" Name="@GetNiceTypeName()" SeriesType="SeriesType.Line"
-                                 XValue="@(e => e.MetricDateTime)"
-                                 YAggregate="@(e => e.Count())"
-                                 OrderBy="x => x.X"/>
+                
+                @foreach (var perMetricData in data.GroupBy(x => x.MetricType))
+                {
+                    <ApexPointSeries TItem="StreamMetric" Items="perMetricData" Name="@GetNiceTypeName(perMetricData.Key)" SeriesType="SeriesType.Line"
+                                     XValue="@(e => e.MetricDateTime)"
+                                     YAggregate="@(e => e.Count())"
+                                     OrderBy="x => x.X"/>
+                }
+
             </ApexChart>
         </div>
         
         <div class="box has-background-info has-text-white">
-            <h3 class="title is-4 is-capitalized">Top @(GetNiceTypeName()) between @(MinDateRange.ToString("f")) - @(MaxDateRange.ToString("f"))</h3>
+            <h3 class="title is-4 is-capitalized">Top @(GetNiceTypeName(MetricTypes.ViewerCount)) between @(MinDateRange.ToString("f")) - @(MaxDateRange.ToString("f"))</h3>
             <div class="content">
                 <ol>
-                    @foreach (var topInteractions in GetTopMetrics(data))
+                    @foreach (var topMetrics in GetTopMetrics(data, MetricTypes.ViewerCount))
                     {
-                        <li><span class="has-text-weight-bold">@topInteractions.Name</span> (@topInteractions.Count @GetNiceTypeName())</li>
+                        <li><span class="has-text-weight-bold">@topMetrics.Time.ToString("f")</span> (@topMetrics.Count @GetNiceTypeName(MetricTypes.ViewerCount))</li>
                     }
                 </ol>
             </div>
@@ -65,8 +72,8 @@
     public string ChartContainerStyles { get; set; } = string.Empty;
 
     public string[] PreMadeMetricTypes = new[] { MetricTypes.ViewerCount, MetricTypes.Currency };
-
     public string MetricType { get; set; } = MetricTypes.ViewerCount;
+    
     public DateTime MinDateRange { get; set; }
     public DateTime MaxDateRange { get; set; }
 
@@ -97,25 +104,22 @@
         { MaxDateRange = EndPeriod; }
     }
 
-    public string GetNiceTypeName()
-    {
-        var sanitisedName = MetricType.Replace("-", " ").Replace("_", " ");
-        return $"{sanitisedName}s";
-    }
+    public string GetNiceTypeName(string metricType)
+    { return metricType.Replace("-", " ").Replace("_", " "); }
     
-    public IEnumerable<(string Name, int Count)> GetTopMetrics(IReadOnlyCollection<StreamMetric> data)
+    public IEnumerable<(DateTime Time, int Count)> GetTopMetrics(IReadOnlyCollection<StreamMetric> data, string metricType)
     {
         return data
-            .Where(x => x.MetricDateTime >= MinDateRange && x.MetricDateTime <= MaxDateRange)
-            .GroupBy(x => x.UserContext)
-            .Select(x => (Name: x.First().UserContext, Count: x.Count()))
+            .Where(x => x.MetricType == metricType && x.MetricDateTime >= MinDateRange && x.MetricDateTime <= MaxDateRange)
+            .GroupBy(x => x.MetricDateTime.ToString("g"))
+            .Select(x => (Time: DateTime.Parse(x.Key), Count: x.Count()))
             .OrderByDescending(x => x.Count)
             .Take(5);
     }
-
+    
     public IReadOnlyCollection<StreamMetric> GetMetrics()
     {
-        var query = new GetMetricsQuery(SourceContext, PlatformContext, StartPeriod, EndPeriod, new [] {MetricType});
+        var query = new GetMetricsQuery(SourceContext, PlatformContext, StartPeriod, EndPeriod);
         var results = MetricRepository.Query(query);
         return results.ToArray();
     }

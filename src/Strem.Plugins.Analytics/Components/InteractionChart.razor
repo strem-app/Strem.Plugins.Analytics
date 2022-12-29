@@ -7,6 +7,7 @@
 
 <div class="@ChartContainerStyles">
     
+    @*
     <div class="box has-background-info has-text-white">
         <div class="columns">
             <div class="column">
@@ -19,7 +20,8 @@
             </div>
         </div>
     </div>
-
+    *@
+    
     @{ var data = GetInteractions(); }
     @if (data.Count == 0)
     { <p class="box">No Data For Period</p> }
@@ -27,20 +29,25 @@
     {
         <div class="box">
             <ApexChart TItem="StreamInteraction" Title="Stream Interactions" Height="400" OnZoomed="ResetBreakdownPeriod" XAxisType="XAxisType.Datetime">
-                <ApexPointSeries TItem="StreamInteraction" Items="data" Name="@GetNiceTypeName()" SeriesType="SeriesType.Line"
-                                 XValue="@(e => e.InteractionDateTime)"
-                                 YAggregate="@(e => e.Count())"
-                                 OrderBy="x => x.X"/>
+                
+                @foreach (var perInteractionData in data.GroupBy(x => x.InteractionType))
+                {
+                    <ApexPointSeries TItem="StreamInteraction" Items="perInteractionData" Name="@GetNiceTypeName(perInteractionData.Key)" SeriesType="SeriesType.Line"
+                                     XValue="@(e => e.InteractionDateTime)"
+                                     YAggregate="@(e => e.Count())"
+                                     OrderBy="x => x.X"/>
+                }
+                
             </ApexChart>
         </div>
 
         <div class="box has-background-info has-text-white">
-            <h3 class="title is-4 is-capitalized">Top @(GetNiceTypeName()) between @(MinDateRange.ToString("f")) - @(MaxDateRange.ToString("f"))</h3>
+            <h3 class="title is-4 is-capitalized">Top @(GetNiceTypeName(InteractionTypes.ChatMessage))s between @(MinDateRange.ToString("f")) - @(MaxDateRange.ToString("f"))</h3>
             <div class="content">
                 <ol>
-                    @foreach (var topInteractions in GetTopInteractions(data))
+                    @foreach (var topInteractions in GetTopInteractions(data, InteractionTypes.ChatMessage))
                     {
-                        <li><span class="has-text-weight-bold">@topInteractions.Name</span> (@topInteractions.Count @GetNiceTypeName())</li>
+                        <li><span class="has-text-weight-bold">@topInteractions.Name</span> (@topInteractions.Count @GetNiceTypeName(InteractionTypes.ChatMessage)s)</li>
                     }
                 </ol>
             </div>
@@ -77,11 +84,8 @@
         base.OnInitialized();
     }
 
-    public string GetNiceTypeName()
-    {
-        var sanitisedName = InteractionType.Replace("-", " ").Replace("_", " ");
-        return $"{sanitisedName}s";
-    }
+    public string GetNiceTypeName(string interactionType)
+    { return interactionType.Replace("-", " ").Replace("_", " "); }
     
     public void ResetBreakdownPeriod(ZoomedData<StreamInteraction> zoomedData)
     {
@@ -103,10 +107,10 @@
         { MaxDateRange = EndPeriod; }
     }
 
-    public IEnumerable<(string Name, int Count)> GetTopInteractions(IReadOnlyCollection<StreamInteraction> data)
+    public IEnumerable<(string Name, int Count)> GetTopInteractions(IReadOnlyCollection<StreamInteraction> data, string interactionType)
     {
         return data
-            .Where(x => x.InteractionDateTime >= MinDateRange && x.InteractionDateTime <= MaxDateRange)
+            .Where(x => x.InteractionType == interactionType && x.InteractionDateTime >= MinDateRange && x.InteractionDateTime <= MaxDateRange)
             .GroupBy(x => x.UserContext)
             .Select(x => (Name: x.First().UserContext, Count: x.Count()))
             .OrderByDescending(x => x.Count)
@@ -115,7 +119,7 @@
 
     public IReadOnlyCollection<StreamInteraction> GetInteractions()
     {
-        var query = new GetInteractionsQuery(SourceContext, PlatformContext, StartPeriod, EndPeriod, new [] {InteractionType});
+        var query = new GetInteractionsQuery(SourceContext, PlatformContext, StartPeriod, EndPeriod);
         var results = InteractionRepository.Query(query);
         return results.ToArray();
     }
