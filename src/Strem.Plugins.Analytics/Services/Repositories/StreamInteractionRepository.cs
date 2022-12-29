@@ -1,4 +1,5 @@
-﻿using LiteDB;
+﻿using System.Linq.Expressions;
+using LiteDB;
 using Strem.Data;
 using Strem.Plugins.Analytics.Models;
 using Strem.Plugins.Analytics.Services.Database;

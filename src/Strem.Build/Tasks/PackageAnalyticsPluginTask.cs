@@ -31,6 +31,8 @@ public class PackageAnalyticsPluginTask : FrostingTask<BuildContext>
         context.DotNetPublish(pluginProject, publishSettings);
 
         context.MoveFile($"{pluginTempOutput}/Strem.Plugins.Analytics.dll", $"{pluginFinalOutput}/Strem.Plugins.Analytics.dll");
+        context.MoveFile($"{pluginTempOutput}/Blazor-ApexCharts.dll", $"{pluginFinalOutput}/Blazor-ApexCharts.dll");
+        context.MoveDirectory($"{pluginTempOutput}/wwwroot", $"{pluginFinalOutput}/wwwroot");
         context.Zip(pluginContainerFolder, $"{Directories.Dist}/{pluginName}.zip");
     }
 }

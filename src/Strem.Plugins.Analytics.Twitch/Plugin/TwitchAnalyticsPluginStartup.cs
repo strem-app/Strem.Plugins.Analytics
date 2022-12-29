@@ -18,6 +18,8 @@ namespace Strem.Plugins.Analytics.Twitch.Plugin;
 
 public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
 {
+    public const string TwitchPlatformContext = "twitch"; 
+    
     private CompositeDisposable _subs = new();
     
     public IEventBus EventBus { get; }
@@ -93,7 +95,7 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             MetricDateTime = DateTime.Now,
             MetricValue = stream.ViewerCount,
             SourceContext = stream.UserName,
-            PlatformContext = "twitch",
+            PlatformContext = TwitchPlatformContext,
             Metadata = new Dictionary<string, string>()
             {
                 { "category", stream.GameName },
@@ -110,7 +112,7 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         {
             InteractionType = InteractionTypes.UserJoined,
             SourceContext = args.Channel,
-            PlatformContext = "twitch",
+            PlatformContext = TwitchPlatformContext,
             UserContext = args.Username,
             InteractionDateTime = DateTime.Now,
             Metadata = new Dictionary<string, string>()
@@ -129,7 +131,7 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         {
             MetricType = MetricTypes.Currency,
             SourceContext = args.Channel,
-            PlatformContext = "twitch",
+            PlatformContext = TwitchPlatformContext,
             UserContext = args.Subscriber.DisplayName,
             MetricDateTime = DateTime.Now,
             Metadata = new Dictionary<string, string>()
@@ -150,7 +152,7 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         {
             MetricType = MetricTypes.Currency,
             SourceContext = args.Channel,
-            PlatformContext = "twitch",
+            PlatformContext = TwitchPlatformContext,
             UserContext = args.ReSubscriber.DisplayName,
             MetricDateTime = DateTime.Now,
             Metadata = new Dictionary<string, string>()
@@ -171,7 +173,7 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         {
             MetricType = MetricTypes.Currency,
             SourceContext = args.Channel,
-            PlatformContext = "twitch",
+            PlatformContext = TwitchPlatformContext,
             UserContext = args.GiftedSubscription.MsgParamRecipientUserName,
             MetricDateTime = DateTime.Now,
             Metadata = new Dictionary<string, string>()
@@ -193,7 +195,7 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         {
             InteractionType = InteractionTypes.UserLeft,
             SourceContext = args.Channel,
-            PlatformContext = "twitch",
+            PlatformContext = TwitchPlatformContext,
             UserContext = args.Username,
             InteractionDateTime = DateTime.Now,
             Metadata = new Dictionary<string, string>()
@@ -213,7 +215,7 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         {
             InteractionType = InteractionTypes.ChatMessage,
             SourceContext = args.ChatMessage.Channel,
-            PlatformContext = "twitch",
+            PlatformContext = TwitchPlatformContext,
             UserContext = args.ChatMessage.Username,
             InteractionDateTime = DateTime.Now,
             Metadata = new Dictionary<string, string>()
@@ -231,7 +233,7 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         {
             MetricType = MetricTypes.Currency,
             UserContext = args.ChatMessage.Username,
-            PlatformContext = "twitch",
+            PlatformContext = TwitchPlatformContext,
             SourceContext = args.ChatMessage.Channel,
             MetricDateTime = DateTime.Now,
             Metadata = new Dictionary<string, string>()

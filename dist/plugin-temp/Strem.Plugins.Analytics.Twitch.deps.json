@@ -9,13 +9,25 @@
       "Strem.Plugins.Analytics.Twitch/0.0.0": {
         "dependencies": {
           "Microsoft.AspNetCore.Components.Web": "6.0.8",
-          "Strem.Core": "0.7.206",
-          "Strem.Flows": "0.7.206",
+          "Strem.Core": "0.7.212",
+          "Strem.Flows": "0.7.212",
           "Strem.Plugins.Analytics": "0.0.0",
-          "Strem.Twitch": "0.7.206"
+          "Strem.Twitch": "0.7.212"
         },
         "runtime": {
           "Strem.Plugins.Analytics.Twitch.dll": {}
+        }
+      },
+      "Blazor-ApexCharts/0.9.16-beta": {
+        "dependencies": {
+          "Microsoft.AspNetCore.Components": "6.0.8",
+          "Microsoft.AspNetCore.Components.Web": "6.0.8"
+        },
+        "runtime": {
+          "lib/net6.0/Blazor-ApexCharts.dll": {
+            "assemblyVersion": "0.9.16.0",
+            "fileVersion": "0.9.16.0"
+          }
         }
       },
       "Glob/1.1.9": {
@@ -279,7 +291,7 @@
           }
         }
       },
-      "Strem.Core/0.7.206": {
+      "Strem.Core/0.7.212": {
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "6.0.0",
           "Microsoft.Extensions.Logging.Abstractions": "6.0.1",
@@ -288,39 +300,39 @@
         },
         "runtime": {
           "lib/net6.0/Strem.Core.dll": {
-            "assemblyVersion": "0.7.206.0",
-            "fileVersion": "0.7.206.0"
+            "assemblyVersion": "0.7.212.0",
+            "fileVersion": "0.7.212.0"
           }
         }
       },
-      "Strem.Data/0.7.206": {
+      "Strem.Data/0.7.212": {
         "dependencies": {
           "LiteDB": "5.0.12",
-          "Strem.Core": "0.7.206"
+          "Strem.Core": "0.7.212"
         },
         "runtime": {
           "lib/net6.0/Strem.Data.dll": {
-            "assemblyVersion": "0.7.206.0",
-            "fileVersion": "0.7.206.0"
+            "assemblyVersion": "0.7.212.0",
+            "fileVersion": "0.7.212.0"
           }
         }
       },
-      "Strem.Flows/0.7.206": {
+      "Strem.Flows/0.7.212": {
         "dependencies": {
           "Microsoft.Extensions.DependencyInjection.Abstractions": "6.0.0",
           "Microsoft.Extensions.Logging.Abstractions": "6.0.1",
           "Newtonsoft.Json": "13.0.1",
-          "Strem.Data": "0.7.206",
+          "Strem.Data": "0.7.212",
           "System.Reactive": "5.0.0"
         },
         "runtime": {
           "lib/net6.0/Strem.Flows.dll": {
-            "assemblyVersion": "0.7.206.0",
-            "fileVersion": "0.7.206.0"
+            "assemblyVersion": "0.7.212.0",
+            "fileVersion": "0.7.212.0"
           }
         }
       },
-      "Strem.Infrastructure/0.7.206": {
+      "Strem.Infrastructure/0.7.212": {
         "dependencies": {
           "Glob": "1.1.9",
           "LiteDB": "5.0.12",
@@ -329,42 +341,42 @@
           "Serilog.Extensions.Logging": "3.1.0",
           "Serilog.Sinks.Console": "4.0.1",
           "Serilog.Sinks.File": "5.0.0",
-          "Strem.Core": "0.7.206",
-          "Strem.Data": "0.7.206",
-          "Strem.Flows": "0.7.206"
+          "Strem.Core": "0.7.212",
+          "Strem.Data": "0.7.212",
+          "Strem.Flows": "0.7.212"
         },
         "runtime": {
           "lib/net6.0/Strem.Infrastructure.dll": {
-            "assemblyVersion": "0.7.206.0",
-            "fileVersion": "0.7.206.0"
+            "assemblyVersion": "0.7.212.0",
+            "fileVersion": "0.7.212.0"
           }
         }
       },
-      "Strem.Todos/0.7.206": {
+      "Strem.Todos/0.7.212": {
         "dependencies": {
           "Microsoft.AspNetCore.Components.Web": "6.0.8",
-          "Strem.Infrastructure": "0.7.206"
+          "Strem.Infrastructure": "0.7.212"
         },
         "runtime": {
           "lib/net6.0/Strem.Todos.dll": {
-            "assemblyVersion": "0.7.206.0",
-            "fileVersion": "0.7.206.0"
+            "assemblyVersion": "0.7.212.0",
+            "fileVersion": "0.7.212.0"
           }
         }
       },
-      "Strem.Twitch/0.7.206": {
+      "Strem.Twitch/0.7.212": {
         "dependencies": {
           "Newtonsoft.Json": "13.0.1",
           "RestSharp": "108.0.1",
-          "Strem.Infrastructure": "0.7.206",
-          "Strem.Todos": "0.7.206",
+          "Strem.Infrastructure": "0.7.212",
+          "Strem.Todos": "0.7.212",
           "System.Reactive": "5.0.0",
           "TwitchLib": "3.4.1"
         },
         "runtime": {
           "lib/net6.0/Strem.Twitch.dll": {
-            "assemblyVersion": "0.7.206.0",
-            "fileVersion": "0.7.206.0"
+            "assemblyVersion": "0.7.212.0",
+            "fileVersion": "0.7.212.0"
           }
         }
       },
@@ -887,8 +899,9 @@
       },
       "Strem.Plugins.Analytics/0.0.0": {
         "dependencies": {
+          "Blazor-ApexCharts": "0.9.16-beta",
           "Microsoft.AspNetCore.Components.Web": "6.0.8",
-          "Strem.Infrastructure": "0.7.206"
+          "Strem.Infrastructure": "0.7.212"
         },
         "runtime": {
           "Strem.Plugins.Analytics.dll": {}
@@ -901,6 +914,13 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "Blazor-ApexCharts/0.9.16-beta": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-BaroEnydQzCgDooyMH5J1DRKsh3oh8rDEJ960J7Ez4nFBeeUy/f2MEXAGCPjNEsIinPrR6gfjM5Gvt08Gq4JCg==",
+      "path": "blazor-apexcharts/0.9.16-beta",
+      "hashPath": "blazor-apexcharts.0.9.16-beta.nupkg.sha512"
     },
     "Glob/1.1.9": {
       "type": "package",
@@ -1196,47 +1216,47 @@
       "path": "serilog.sinks.file/5.0.0",
       "hashPath": "serilog.sinks.file.5.0.0.nupkg.sha512"
     },
-    "Strem.Core/0.7.206": {
+    "Strem.Core/0.7.212": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-HQ/SGgqiuYePyl4jS6VknDBZlwNyoeIw+oSIy7UNtjprJk7zax5cCMgOBEiBzVmXH92pAkw7ebP897pa3Mqv8A==",
-      "path": "strem.core/0.7.206",
-      "hashPath": "strem.core.0.7.206.nupkg.sha512"
+      "sha512": "sha512-eBmhVdPf3oeoH6n8pOw+aTy/oDa1up/GPz/B+t/GHW6qNv8kojNQ+gTemE7f5HZOZmU+aIWgKWcCayRNkAdthg==",
+      "path": "strem.core/0.7.212",
+      "hashPath": "strem.core.0.7.212.nupkg.sha512"
     },
-    "Strem.Data/0.7.206": {
+    "Strem.Data/0.7.212": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-l2bM1xMKbHlnybBAbww/PAfzIx9mXJiMC7idX/PWWC/2FF4RK+K/r8U+DSQSMZMReYqBFs+Mbq7G5zRnWfZN+A==",
-      "path": "strem.data/0.7.206",
-      "hashPath": "strem.data.0.7.206.nupkg.sha512"
+      "sha512": "sha512-6r1gtnDk+ydzg8vTm7zBQLKanqlGc3rVlxKTkHZQIxMBNc34NXDrOJxz645nrkAm1UDnvYJ2/sm/WzRt1zddqg==",
+      "path": "strem.data/0.7.212",
+      "hashPath": "strem.data.0.7.212.nupkg.sha512"
     },
-    "Strem.Flows/0.7.206": {
+    "Strem.Flows/0.7.212": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-LkdHN3X1IUvv/Mmz0g8+gIF65RbPNj6jllUu3R1qv8COOw9rYp+z9eUnnipz1+Dc4qD5qMRB/t18uKGr0NMb4g==",
-      "path": "strem.flows/0.7.206",
-      "hashPath": "strem.flows.0.7.206.nupkg.sha512"
+      "sha512": "sha512-Bzug9yAqoAECw5+0KFB4U0v/yemgQ+8nwGdIZ+jRG+m2NMd6ZAQDLNsxB39kg7KU8vYsuQyh4sC0bIz5JC1nCw==",
+      "path": "strem.flows/0.7.212",
+      "hashPath": "strem.flows.0.7.212.nupkg.sha512"
     },
-    "Strem.Infrastructure/0.7.206": {
+    "Strem.Infrastructure/0.7.212": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-MIYET1kscXAe5PH3J+huJ3cHgHpZBA7dAYI6jS6ws/t/RLWrepOBqb7JVEQg9Zy20NjDzrP0vhikgt/Y/pf3wQ==",
-      "path": "strem.infrastructure/0.7.206",
-      "hashPath": "strem.infrastructure.0.7.206.nupkg.sha512"
+      "sha512": "sha512-UCwOWjk7HwbdywjNIJ/0S3WeBzhhYYDOg8WEvjwcttd1SPo9P841uJ3lDJNQlHILbdl5Y7+MKGKOS3KbIxgseA==",
+      "path": "strem.infrastructure/0.7.212",
+      "hashPath": "strem.infrastructure.0.7.212.nupkg.sha512"
     },
-    "Strem.Todos/0.7.206": {
+    "Strem.Todos/0.7.212": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ZMksp554Vn6N9jn7AObroS/jRuRt9k5OPg5bFMkt5GXS+T9JCVq8UyLynXksExMJw+emzIViDY/iAaDB+LdOBw==",
-      "path": "strem.todos/0.7.206",
-      "hashPath": "strem.todos.0.7.206.nupkg.sha512"
+      "sha512": "sha512-RAhUWpBX38I1fRYhXl0Xm7dI/LusYzvvUPcemlmdgwS/H0Of8sUWJnIGBQSP0coTTpTRxA/MzMVeR/FraeJ/OA==",
+      "path": "strem.todos/0.7.212",
+      "hashPath": "strem.todos.0.7.212.nupkg.sha512"
     },
-    "Strem.Twitch/0.7.206": {
+    "Strem.Twitch/0.7.212": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-VeWajrTgZEujbtHVv8Tz/1UHtTNWU+vv6bQ9oHUCgyHSW6Ktq040WNof+4ZJt9alj82iNvSd6xBjyhUbR3nLZA==",
-      "path": "strem.twitch/0.7.206",
-      "hashPath": "strem.twitch.0.7.206.nupkg.sha512"
+      "sha512": "sha512-CN2GUpwo1H3ovCyscsu8XRU45GwnDU1YMtrNh07isUluzzkvr+sLch1seK7Ae5Z6fwGgeqA9mBho2AexV9X2XQ==",
+      "path": "strem.twitch/0.7.212",
+      "hashPath": "strem.twitch.0.7.212.nupkg.sha512"
     },
     "System.Collections/4.3.0": {
       "type": "package",

@@ -1,0 +1,100 @@
+@using Strem.Plugins.Analytics.Services.Repositories
+@using Strem.Plugins.Analytics.Models
+@using Strem.Plugins.Analytics.Services.Repositories.Queries
+@using Strem.Plugins.Analytics.Types
+@inject IStreamMetricRepository MetricRepository
+
+<div class="box @ChartContainerStyles">
+    <div class="box has-background-info has-text-white">
+        <div class="field is-horizontal">
+            <div class="field-label is-normal">
+                <label class="label has-text-white">Interactions</label>
+            </div>
+            <div class="field-body">
+                <div class="control">
+                    <AutoComplete Data="PreMadeMetricTypes" @bind-Value="MetricType" />
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    @{ var data = GetMetrics(); }
+    @if (data.Count == 0)
+    { <p>No Data For Period</p> }
+    else
+    {
+        <ApexChart TItem="StreamMetric" Title="Stream Metrics" Height="400" OnZoomed="ResetBreakdownPeriod">
+            <ApexPointSeries TItem="StreamMetric" Items="data" Name="@MetricType" SeriesType="SeriesType.Line"
+                             XValue="@(e => e.MetricDateTime.ToString("g"))"
+                             YAggregate="@(e => e.Count())"
+                             OrderBy="x => x.X"/>
+        </ApexChart>
+        
+        <div class="box has-background-info has-text-white">
+            <h3 class="title is-4">Top Interactions</h3>
+            <div class="content">
+                <ol>
+                    @foreach (var topInteractions in GetTopInteractions(data))
+                    {
+                        <li><span class="has-text-weight-bold">@topInteractions.Name</span> (@topInteractions.Count @(MetricType)s)</li>
+                    }
+                </ol>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public DateTime StartPeriod { get; set; }
+    
+    [Parameter]
+    public DateTime EndPeriod { get; set; }
+    
+    [Parameter]
+    public string PlatformContext { get; set; }
+    
+    [Parameter]
+    public string SourceContext { get; set; }
+
+    [Parameter]
+    public string ChartContainerStyles { get; set; } = string.Empty;
+
+    public string[] PreMadeMetricTypes = new[] { MetricTypes.ViewerCount, MetricTypes.Currency };
+
+    public string MetricType { get; set; } = MetricTypes.ViewerCount;
+    public string MinDateRange { get; set; }
+    public string MaxDateRange { get; set; }
+
+    protected override void OnInitialized()
+    {
+        MinDateRange = StartPeriod.ToString("g");
+        MaxDateRange = EndPeriod.ToString("g");
+        base.OnInitialized();
+    }
+    
+    public void ResetBreakdownPeriod(ZoomedData<StreamMetric> zoomedData)
+    {
+        if (!zoomedData.IsZoomed)
+        {
+            MinDateRange = StartPeriod.ToString("g");
+            MaxDateRange = EndPeriod.ToString("g");
+            return;
+        }
+    }
+
+    public IEnumerable<(string Name, int Count)> GetTopInteractions(IReadOnlyCollection<StreamMetric> data)
+    {
+        return data.GroupBy(x => x.UserContext)
+            .Select(x => (Name: x.First().UserContext, Count: x.Count()))
+            .OrderByDescending(x => x.Count)
+            .Take(5);
+    }
+
+    public IReadOnlyCollection<StreamMetric> GetMetrics()
+    {
+        var query = new GetMetricsQuery(SourceContext, PlatformContext, StartPeriod, EndPeriod, new [] {MetricType});
+        var results = MetricRepository.Query(query);
+        return results.ToArray();
+    }
+}

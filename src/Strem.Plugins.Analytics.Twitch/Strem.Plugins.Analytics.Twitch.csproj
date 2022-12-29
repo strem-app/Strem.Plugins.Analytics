@@ -8,9 +8,9 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.8" />
-        <PackageReference Include="Strem.Core" Version="0.7.206" />
-        <PackageReference Include="Strem.Flows" Version="0.7.206" />
-        <PackageReference Include="Strem.Twitch" Version="0.7.206" />
+        <PackageReference Include="Strem.Core" Version="0.7.212" />
+        <PackageReference Include="Strem.Flows" Version="0.7.212" />
+        <PackageReference Include="Strem.Twitch" Version="0.7.212" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,43 +1,76 @@
 ﻿@page "/analytics"
-@using Strem.Plugins.Analytics.Services.Repositories
 
-@inject IStreamInteractionRepository InteractionRepository
-@inject IStreamMetricRepository MetricRepository
+@using Microsoft.JSInterop
+@using Strem.Core.Extensions
+@using Strem.Core.State
+@using Strem.Plugins.Analytics.Extensions
+@using Microsoft.AspNetCore.Components
+
+@inject IJSRuntime JS
+@inject IAppState AppState
 
 <div class="container is-fluid">
     <ErrorBoundary>
         <ChildContent>
             <h3 class="title is-3">Analytics</h3>
             <div class="box has-background-grey-dark">
-                <h4 class="title is-4">Interactions</h4>
-                <ul>
-                    @foreach (var interaction in InteractionRepository.GetAll())
-                    {
-                        <li>
-                            <span>@interaction.InteractionType</span>
-                            <span>@interaction.PlatformContext</span>
-                            <span>@interaction.SourceContext</span>
-                            <span>@interaction.UserContext</span>
-                        </li>
-                    }
-                </ul>
+                <div class="box has-background-info">
+                    <div class="field is-horizontal">
+                        <div class="field-label is-normal">
+                            <label class="label has-text-white">Date Range</label>
+                        </div>
+                        <div class="field-body">
+                            <div class="control">
+                                <input type="datetime-local" class="input" value="@StartPeriod.ToString("s")" @onchange="x => UpdateStartPeriod(x.Value.ToString())"/>
+                            </div>
+                            <div class="control">
+                                <div class="divider is-vertical has-text-white">To</div>
+                            </div>
+                            <div class="control">
+                                <input type="datetime-local" class="input" value="@EndPeriod.ToString("s")" @onchange="x => UpdateEndPeriod(x.Value.ToString())"/>
+                            </div>
+                        </div>
+                        <div class="field-label is-normal">
+                            <label class="label has-text-white">Platform</label>
+                        </div>
+                        <div class="field-body">
+                            <div class="control">
+                                <AutoComplete Data="@PreMadePlatformContext" @bind-Value="@PlatformContext" />
+                            </div>
+                        </div>
+                        <div class="field-label is-normal">
+                            <label class="label has-text-white">Source/Channel</label>
+                        </div>
+                        <div class="field-body">
+                            <div class="control">
+                                @*<AutoComplete Data="PreMadeSourceContext" @bind-Value="SourceContext" />*@
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="tabs is-medium">
+                        <ul>
+                            <li class="@(AnalyticsType == AnalyticsTypes.Interactions ? "is-active" : "")">
+                                <a @onclick="() => AnalyticsType = AnalyticsTypes.Interactions">Interactions</a>
+                            </li>
+                            <li class="@(AnalyticsType == AnalyticsTypes.Metrics ? "is-active" : "")">
+                                <a @onclick="() => AnalyticsType = AnalyticsTypes.Metrics">Metrics</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        @if (HasLoadedChartLib && AnalyticsType == AnalyticsTypes.Interactions)
+                        {
+                            <InteractionChart StartPeriod="@StartPeriod" EndPeriod="@EndPeriod" PlatformContext="@PlatformContext" SourceContext="@SourceContext"/>
+                        }
+                        else if (HasLoadedChartLib && AnalyticsType == AnalyticsTypes.Metrics)
+                        {
+                            <MetricsChart StartPeriod="@StartPeriod" EndPeriod="@EndPeriod" PlatformContext="@PlatformContext" SourceContext="@SourceContext"/>
+                        }
+                    </div>
+                </div>
             </div>
-            <div class="box has-background-grey-dark">
-                <h4 class="title is-4">Metrics</h4>
-                <ul>
-                    @foreach (var metrics in MetricRepository.GetAll())
-                    {
-                        <li>
-                            <span>@metrics.MetricType</span>
-                            <span>@metrics.MetricValue</span>
-                            <span>@metrics.PlatformContext</span>
-                            <span>@metrics.SourceContext</span>
-                            <span>@metrics.UserContext</span>
-                        </li>
-                    }
-                </ul>
-            </div>
-            
         </ChildContent>
         <ErrorContent>
             <TheSkyIsFalling/>
@@ -47,4 +80,41 @@
 
 @code {
 
+    public enum AnalyticsTypes
+    {
+        Interactions,
+        Metrics
+    }
+    
+    public bool HasLoadedChartLib { get; set; }
+    public AnalyticsTypes AnalyticsType { get; set; }
+    
+    public DateTime StartPeriod { get; set; } = DateTime.Now.GetStartOfMonth();
+    public DateTime EndPeriod { get; set; } = DateTime.Now.GetEndOfMonth();
+    public string PlatformContext { get; set; } = "twitch";
+    public string SourceContext { get; set; } = string.Empty;
+    
+    public string[] PreMadePlatformContext { get; set; }
+    public string[] PreMadeSourceContext { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        PreMadePlatformContext = new[] { "twitch" };
+
+        var existingUsername = AppState.AppVariables.Get("username", "twitch");
+        PreMadeSourceContext = string.IsNullOrEmpty(existingUsername) ? Array.Empty<string>() : new[] { existingUsername };
+        SourceContext = string.IsNullOrEmpty(existingUsername) ? "" : existingUsername;
+        
+        await JS.InvokeVoidAsync("loadJsFile", $"{PluginPathHelper.GetPluginStaticFileRootPath("Strem.Plugins.Analytics")}/js/apexcharts.fixed.js");
+        await JS.InvokeVoidAsync("loadJsFile", $"{PluginPathHelper.GetPluginStaticFileRootPath("Strem.Plugins.Analytics")}/_content/Blazor-ApexCharts/js/blazor-apex-charts.js");
+        await JS.InvokeVoidAsync("loadCssFile", $"{PluginPathHelper.GetPluginStaticFileRootPath("Strem.Plugins.Analytics")}/_content/Blazor-ApexCharts/css/apexcharts.css");
+
+        HasLoadedChartLib = true;
+    }
+    
+    public void UpdateStartPeriod(string newDate)
+    { StartPeriod = DateTime.Parse(newDate); }
+
+    public void UpdateEndPeriod(string newDate)
+    { EndPeriod = DateTime.Parse(newDate); }
 }
