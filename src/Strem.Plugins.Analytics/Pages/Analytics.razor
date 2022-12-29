@@ -15,60 +15,77 @@
             <h3 class="title is-3">Analytics</h3>
             <div class="box has-background-grey-dark">
                 <div class="box has-background-info">
-                    <div class="field is-horizontal">
-                        <div class="field-label is-normal">
-                            <label class="label has-text-white">Date Range</label>
-                        </div>
-                        <div class="field-body">
-                            <div class="control">
-                                <input type="datetime-local" class="input" value="@StartPeriod.ToString("s")" @onchange="x => UpdateStartPeriod(x.Value.ToString())"/>
-                            </div>
-                            <div class="control">
-                                <div class="divider is-vertical has-text-white">To</div>
-                            </div>
-                            <div class="control">
-                                <input type="datetime-local" class="input" value="@EndPeriod.ToString("s")" @onchange="x => UpdateEndPeriod(x.Value.ToString())"/>
-                            </div>
-                        </div>
-                        <div class="field-label is-normal">
-                            <label class="label has-text-white">Platform</label>
-                        </div>
-                        <div class="field-body">
-                            <div class="control">
-                                <AutoComplete Data="@PreMadePlatformContext" @bind-Value="@PlatformContext" />
+                    <div class="columns">
+                        <div class="column">
+                            <div class="field">
+                                <label class="label has-text-white">Date Range</label>
+                                <div class="field is-grouped">
+                                    <div class="control">
+                                        <input type="datetime-local" class="input" value="@StartPeriod.ToString("s")" @onchange="x => UpdateStartPeriod(x.Value.ToString())"/>
+                                    </div>
+                                    <div class="control">
+                                        <div class="divider is-vertical has-text-white">To</div>
+                                    </div>
+                                    <div class="control">
+                                        <input type="datetime-local" class="input" value="@EndPeriod.ToString("s")" @onchange="x => UpdateEndPeriod(x.Value.ToString())"/>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="field-label is-normal">
-                            <label class="label has-text-white">Source/Channel</label>
+                        <div class="column">
+                            <div class="field">
+                                <label class="label has-text-white">Platform</label>
+                                <div class="control">
+                                    <AutoComplete Data="@PreMadePlatformContext" @bind-Value="@PlatformContext" />
+                                </div>
+                            </div>
                         </div>
-                        <div class="field-body">
-                            <div class="control">
-                                @*<AutoComplete Data="PreMadeSourceContext" @bind-Value="SourceContext" />*@
+                        <div class="column">
+                            <div class="field">
+                                <label class="label has-text-white">Source/Channel</label>
+                                <div class="control">
+                                    <AutoComplete Data="@PreMadeSourceContext" @bind-Value="@SourceContext" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="columns">
+                        <div class="column">
+                            <div class="field">
+                                <label class="label has-text-white">Display Type</label>
+                                <div class="control">
+                                    <div class="field has-addons">
+                                        <p class="control">
+                                            <button class="button @(AnalyticsType == AnalyticsTypes.Interactions ? "is-success" : "")" @onclick="() => AnalyticsType = AnalyticsTypes.Interactions">
+                                                <span class="icon is-small">
+                                                    <i class="fas fa-align-left"></i>
+                                                </span>
+                                                <span>Interactions</span>
+                                            </button>
+                                        </p>
+                                        <p class="control">
+                                            <button class="button @(AnalyticsType == AnalyticsTypes.Metrics ? "is-success" : "")" @onclick="() => AnalyticsType = AnalyticsTypes.Metrics">
+                                                <span class="icon is-small">
+                                                    <i class="fas fa-align-center"></i>
+                                                </span>
+                                                <span>Metrics</span>
+                                            </button>
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="box">
-                    <div class="tabs is-medium">
-                        <ul>
-                            <li class="@(AnalyticsType == AnalyticsTypes.Interactions ? "is-active" : "")">
-                                <a @onclick="() => AnalyticsType = AnalyticsTypes.Interactions">Interactions</a>
-                            </li>
-                            <li class="@(AnalyticsType == AnalyticsTypes.Metrics ? "is-active" : "")">
-                                <a @onclick="() => AnalyticsType = AnalyticsTypes.Metrics">Metrics</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div>
-                        @if (HasLoadedChartLib && AnalyticsType == AnalyticsTypes.Interactions)
-                        {
-                            <InteractionChart StartPeriod="@StartPeriod" EndPeriod="@EndPeriod" PlatformContext="@PlatformContext" SourceContext="@SourceContext"/>
-                        }
-                        else if (HasLoadedChartLib && AnalyticsType == AnalyticsTypes.Metrics)
-                        {
-                            <MetricsChart StartPeriod="@StartPeriod" EndPeriod="@EndPeriod" PlatformContext="@PlatformContext" SourceContext="@SourceContext"/>
-                        }
-                    </div>
+                <div>
+                    @if (HasLoadedChartLib && AnalyticsType == AnalyticsTypes.Interactions)
+                    {
+                        <InteractionChart StartPeriod="@StartPeriod" EndPeriod="@EndPeriod" PlatformContext="@PlatformContext" SourceContext="@SourceContext"/>
+                    }
+                    else if (HasLoadedChartLib && AnalyticsType == AnalyticsTypes.Metrics)
+                    {
+                        <MetricsChart StartPeriod="@StartPeriod" EndPeriod="@EndPeriod" PlatformContext="@PlatformContext" SourceContext="@SourceContext"/>
+                    }
                 </div>
             </div>
         </ChildContent>

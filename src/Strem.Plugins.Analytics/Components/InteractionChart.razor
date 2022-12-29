@@ -2,43 +2,45 @@
 @using Strem.Plugins.Analytics.Models
 @using Strem.Plugins.Analytics.Services.Repositories.Queries
 @using Strem.Plugins.Analytics.Types
+@using System.Diagnostics
 @inject IStreamInteractionRepository InteractionRepository
 
 <div class="@ChartContainerStyles">
+    
     <div class="box has-background-info has-text-white">
-        <div class="field is-horizontal">
-            <div class="field-label is-normal">
-                <label class="label has-text-white">Interaction Types</label>
-            </div>
-            <div class="field-body">
-                <div class="control">
-                    <AutoComplete Data="PreMadeInteractionTypes" @bind-Value="InteractionType" />
+        <div class="columns">
+            <div class="column">
+                <div class="field">
+                    <label class="label has-text-white">Interaction Types</label>
+                    <div class="control">
+                        <AutoComplete Data="PreMadeInteractionTypes" @bind-Value="InteractionType"/>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    
+
     @{ var data = GetInteractions(); }
     @if (data.Count == 0)
-    { <p>No Data For Period</p> }
+    { <p class="box">No Data For Period</p> }
     else
     {
         <div class="box">
-            <ApexChart TItem="StreamInteraction" Title="Stream Interactions" Height="400" OnZoomed="ResetBreakdownPeriod">
-                <ApexPointSeries TItem="StreamInteraction" Items="data" Name="@InteractionType" SeriesType="SeriesType.Line"
-                                 XValue="@(e => e.InteractionDateTime.ToString("g"))"
+            <ApexChart TItem="StreamInteraction" Title="Stream Interactions" Height="400" OnZoomed="ResetBreakdownPeriod" XAxisType="XAxisType.Datetime">
+                <ApexPointSeries TItem="StreamInteraction" Items="data" Name="@GetNiceTypeName()" SeriesType="SeriesType.Line"
+                                 XValue="@(e => e.InteractionDateTime)"
                                  YAggregate="@(e => e.Count())"
                                  OrderBy="x => x.X"/>
             </ApexChart>
         </div>
 
         <div class="box has-background-info has-text-white">
-            <h3 class="title is-4">Top Interactions</h3>
+            <h3 class="title is-4 is-capitalized">Top @(GetNiceTypeName()) between @(MinDateRange.ToString("f")) - @(MaxDateRange.ToString("f"))</h3>
             <div class="content">
                 <ol>
                     @foreach (var topInteractions in GetTopInteractions(data))
                     {
-                        <li><span class="has-text-weight-bold">@topInteractions.Name</span> (@topInteractions.Count @(InteractionType)s)</li>
+                        <li><span class="has-text-weight-bold">@topInteractions.Name</span> (@topInteractions.Count @GetNiceTypeName())</li>
                     }
                 </ol>
             </div>
@@ -65,29 +67,47 @@
     public string[] PreMadeInteractionTypes = new[] { InteractionTypes.ChatMessage, InteractionTypes.UserJoined, InteractionTypes.UserLeft };
     public string InteractionType { get; set; } = InteractionTypes.ChatMessage;
 
-    public string MinDateRange { get; set; }
-    public string MaxDateRange { get; set; }
+    public DateTime MinDateRange { get; set; }
+    public DateTime MaxDateRange { get; set; }
 
     protected override void OnInitialized()
     {
-        MinDateRange = StartPeriod.ToString("g");
-        MaxDateRange = EndPeriod.ToString("g");
+        MinDateRange = StartPeriod;
+        MaxDateRange = EndPeriod;
         base.OnInitialized();
+    }
+
+    public string GetNiceTypeName()
+    {
+        var sanitisedName = InteractionType.Replace("-", " ").Replace("_", " ");
+        return $"{sanitisedName}s";
     }
     
     public void ResetBreakdownPeriod(ZoomedData<StreamInteraction> zoomedData)
     {
         if (!zoomedData.IsZoomed)
         {
-            MinDateRange = StartPeriod.ToString("g");
-            MaxDateRange = EndPeriod.ToString("g");
+            MinDateRange = StartPeriod;
+            MaxDateRange = EndPeriod;
             return;
         }
+        
+        if (zoomedData.XAxis.Min.HasValue)
+        { MinDateRange = DateTime.UnixEpoch.AddMilliseconds((double)zoomedData.XAxis.Min.Value); }
+        else
+        { MinDateRange = StartPeriod; }
+        
+        if (zoomedData.XAxis.Max.HasValue)
+        { MaxDateRange = DateTime.UnixEpoch.AddMilliseconds((double)zoomedData.XAxis.Max.Value); }
+        else
+        { MaxDateRange = EndPeriod; }
     }
 
     public IEnumerable<(string Name, int Count)> GetTopInteractions(IReadOnlyCollection<StreamInteraction> data)
     {
-        return data.GroupBy(x => x.UserContext)
+        return data
+            .Where(x => x.InteractionDateTime >= MinDateRange && x.InteractionDateTime <= MaxDateRange)
+            .GroupBy(x => x.UserContext)
             .Select(x => (Name: x.First().UserContext, Count: x.Count()))
             .OrderByDescending(x => x.Count)
             .Take(5);

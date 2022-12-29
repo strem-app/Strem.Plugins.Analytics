@@ -2,17 +2,19 @@
 @using Strem.Plugins.Analytics.Models
 @using Strem.Plugins.Analytics.Services.Repositories.Queries
 @using Strem.Plugins.Analytics.Types
+@using System.Diagnostics
 @inject IStreamMetricRepository MetricRepository
 
-<div class="box @ChartContainerStyles">
+<div class="@ChartContainerStyles">
+    
     <div class="box has-background-info has-text-white">
-        <div class="field is-horizontal">
-            <div class="field-label is-normal">
-                <label class="label has-text-white">Interactions</label>
-            </div>
-            <div class="field-body">
-                <div class="control">
-                    <AutoComplete Data="PreMadeMetricTypes" @bind-Value="MetricType" />
+        <div class="columns">
+            <div class="column">
+                <div class="field">
+                    <label class="label has-text-white">Metrics Types</label>
+                    <div class="control">
+                        <AutoComplete Data="PreMadeMetricTypes" @bind-Value="MetricType"/>
+                    </div>
                 </div>
             </div>
         </div>
@@ -20,23 +22,25 @@
     
     @{ var data = GetMetrics(); }
     @if (data.Count == 0)
-    { <p>No Data For Period</p> }
+    { <p class="box">No Data For Period</p> }
     else
     {
-        <ApexChart TItem="StreamMetric" Title="Stream Metrics" Height="400" OnZoomed="ResetBreakdownPeriod">
-            <ApexPointSeries TItem="StreamMetric" Items="data" Name="@MetricType" SeriesType="SeriesType.Line"
-                             XValue="@(e => e.MetricDateTime.ToString("g"))"
-                             YAggregate="@(e => e.Count())"
-                             OrderBy="x => x.X"/>
-        </ApexChart>
+        <div class="box">
+            <ApexChart TItem="StreamMetric" Title="Stream Metrics" Height="400" OnZoomed="ResetBreakdownPeriod" XAxisType="XAxisType.Datetime">
+                <ApexPointSeries TItem="StreamMetric" Items="data" Name="@GetNiceTypeName()" SeriesType="SeriesType.Line"
+                                 XValue="@(e => e.MetricDateTime)"
+                                 YAggregate="@(e => e.Count())"
+                                 OrderBy="x => x.X"/>
+            </ApexChart>
+        </div>
         
         <div class="box has-background-info has-text-white">
-            <h3 class="title is-4">Top Interactions</h3>
+            <h3 class="title is-4 is-capitalized">Top @(GetNiceTypeName()) between @(MinDateRange.ToString("f")) - @(MaxDateRange.ToString("f"))</h3>
             <div class="content">
                 <ol>
-                    @foreach (var topInteractions in GetTopInteractions(data))
+                    @foreach (var topInteractions in GetTopMetrics(data))
                     {
-                        <li><span class="has-text-weight-bold">@topInteractions.Name</span> (@topInteractions.Count @(MetricType)s)</li>
+                        <li><span class="has-text-weight-bold">@topInteractions.Name</span> (@topInteractions.Count @GetNiceTypeName())</li>
                     }
                 </ol>
             </div>
@@ -63,13 +67,13 @@
     public string[] PreMadeMetricTypes = new[] { MetricTypes.ViewerCount, MetricTypes.Currency };
 
     public string MetricType { get; set; } = MetricTypes.ViewerCount;
-    public string MinDateRange { get; set; }
-    public string MaxDateRange { get; set; }
+    public DateTime MinDateRange { get; set; }
+    public DateTime MaxDateRange { get; set; }
 
     protected override void OnInitialized()
     {
-        MinDateRange = StartPeriod.ToString("g");
-        MaxDateRange = EndPeriod.ToString("g");
+        MinDateRange = StartPeriod;
+        MaxDateRange = EndPeriod;
         base.OnInitialized();
     }
     
@@ -77,15 +81,33 @@
     {
         if (!zoomedData.IsZoomed)
         {
-            MinDateRange = StartPeriod.ToString("g");
-            MaxDateRange = EndPeriod.ToString("g");
+            MinDateRange = StartPeriod;
+            MaxDateRange = EndPeriod;
             return;
         }
+        
+        if (zoomedData.XAxis.Min.HasValue)
+        { MinDateRange = DateTime.UnixEpoch.AddMilliseconds((double)zoomedData.XAxis.Min.Value); }
+        else
+        { MinDateRange = StartPeriod; }
+        
+        if (zoomedData.XAxis.Max.HasValue)
+        { MaxDateRange = DateTime.UnixEpoch.AddMilliseconds((double)zoomedData.XAxis.Max.Value); }
+        else
+        { MaxDateRange = EndPeriod; }
     }
 
-    public IEnumerable<(string Name, int Count)> GetTopInteractions(IReadOnlyCollection<StreamMetric> data)
+    public string GetNiceTypeName()
     {
-        return data.GroupBy(x => x.UserContext)
+        var sanitisedName = MetricType.Replace("-", " ").Replace("_", " ");
+        return $"{sanitisedName}s";
+    }
+    
+    public IEnumerable<(string Name, int Count)> GetTopMetrics(IReadOnlyCollection<StreamMetric> data)
+    {
+        return data
+            .Where(x => x.MetricDateTime >= MinDateRange && x.MetricDateTime <= MaxDateRange)
+            .GroupBy(x => x.UserContext)
             .Select(x => (Name: x.First().UserContext, Count: x.Count()))
             .OrderByDescending(x => x.Count)
             .Take(5);
