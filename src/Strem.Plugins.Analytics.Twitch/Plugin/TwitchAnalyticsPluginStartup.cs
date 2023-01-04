@@ -7,6 +7,7 @@ using Strem.Core.Plugins;
 using Strem.Core.State;
 using Strem.Plugins.Analytics.Models;
 using Strem.Plugins.Analytics.Services.Repositories;
+using Strem.Plugins.Analytics.Twitch.Variables;
 using Strem.Plugins.Analytics.Types;
 using Strem.Twitch.Extensions;
 using Strem.Twitch.Services.Client;
@@ -45,9 +46,16 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
 
     public Task SetupPlugin() => Task.CompletedTask;
 
+    public bool MatchesAnalyticsChannels(string channel)
+    {
+        var channelsToMatch = AppState.AppVariables.Get(TwitchAnalyticsViewerVars.Channels);
+        return channelsToMatch.Contains(channel);
+    }
+    
     public async Task StartPlugin()
     {
         Logger.Information("Starting Twitch Analytics Tracking Setup");
+        
         TwitchClient.OnMessageReceived
             .Subscribe(TrackMessageMetrics)
             .AddTo(_subs);
@@ -72,16 +80,43 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             .Subscribe(TrackLeftMetric)
             .AddTo(_subs);
 
+        AppState.AppVariables.OnVariableChanged
+            .Where(x => x.Key == TwitchAnalyticsViewerVars.Channels)
+            .Subscribe(x => JoinRequiredChannels())
+            .AddTo(_subs);
+        
         Observable.Interval(TimeSpan.FromMinutes(TwitchAnalyticsPluginSettings.RefreshViewerCountInMinutes))
             .Subscribe(x => TrackViewerMetrics())
             .AddTo(_subs);
         
+        JoinRequiredChannels();
+
         Logger.Information("Finished Twitch Analytics Tracking Setup");
+    }
+
+    public void JoinRequiredChannels()
+    {
+        if (!AppState.HasTwitchOAuth()) { return; }
+
+        var channelsToJoin = AppState.AppVariables.Get(TwitchAnalyticsViewerVars.Channels);
+        if(string.IsNullOrEmpty(channelsToJoin)) { return; }
+
+        var channels = channelsToJoin.Replace(" ","").Split(",");
+        foreach (var channel in channels)
+        {
+            if (TwitchClient.Client.HasJoinedChannel(channel)) { continue; }
+            
+            Logger.Information($"Twitch Analytics Tracking Channel: {channel}");
+            TwitchClient.Client.JoinChannel(channel);
+        }
     }
 
     private async Task TrackViewerMetrics()
     {
         if (!AppState.HasTwitchOAuth()) { return; }
+        
+        var twitchUsername = AppState.GetTwitchUsername();
+        if (!MatchesAnalyticsChannels(twitchUsername)) { return; }
 
         var twitchUserId = AppState.GetTwitchUserId();
         var userIds = new List<string>() { twitchUserId };
@@ -108,6 +143,8 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
 
     private void TrackJoiningMetric(OnUserJoinedArgs args)
     {
+        if (!MatchesAnalyticsChannels(args.Channel)) { return; }
+        
         var interaction = new StreamInteraction
         {
             InteractionType = InteractionTypes.UserJoined,
@@ -127,6 +164,8 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
 
     private void TrackNewSubscriptionMetric(OnNewSubscriberArgs args)
     {
+        if (!MatchesAnalyticsChannels(args.Channel)) { return; }
+        
         var metric = new StreamMetric
         {
             MetricType = MetricTypes.Currency,
@@ -148,6 +187,8 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
     
     private void TrackReSubscriptionMetric(OnReSubscriberArgs args)
     {
+        if (!MatchesAnalyticsChannels(args.Channel)) { return; }
+        
         var metric = new StreamMetric
         {
             MetricType = MetricTypes.Currency,
@@ -169,6 +210,8 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
     
     private void TrackGiftSubscriptionMetric(OnGiftedSubscriptionArgs args)
     {
+        if (!MatchesAnalyticsChannels(args.Channel)) { return; }
+        
         var metric = new StreamMetric
         {
             MetricType = MetricTypes.Currency,
@@ -191,6 +234,8 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
     
     private void TrackLeftMetric(OnUserLeftArgs args)
     {
+        if (!MatchesAnalyticsChannels(args.Channel)) { return; }
+        
         var interaction = new StreamInteraction
         {
             InteractionType = InteractionTypes.UserLeft,
@@ -210,6 +255,8 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
 
     private void TrackMessageMetrics(OnMessageReceivedArgs args)
     {
+        if (!MatchesAnalyticsChannels(args.ChatMessage.Channel)) { return; }
+        
         Logger.Information("Tracking message metric");
         var interaction = new StreamInteraction
         {

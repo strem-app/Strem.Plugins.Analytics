@@ -1,0 +1,36 @@
+﻿@using System.Reactive.Disposables
+@using Strem.Core.State
+@using Strem.Plugins.Analytics.Twitch.Variables
+
+@inject IAppState AppState
+
+@implements IDisposable
+
+<div class="columns">
+    
+    <div class="column">
+        <div class="field">
+            <label class="label">Twitch Channel</label>
+            <div class="control">
+                <TextInput @bind-Value="@AnalyticsChannel" placeholder="i.e MyTwitchChannel" />
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+@code {
+    
+    private CompositeDisposable _subs = new();
+
+    public string AnalyticsChannel
+    {
+        get => AppState.AppVariables.Get(TwitchAnalyticsViewerVars.Channels);
+        set => AppState.AppVariables.Set(TwitchAnalyticsViewerVars.Channels, value);
+    }
+    
+    public void Dispose()
+    {
+        _subs?.Dispose();  
+    } 
+}

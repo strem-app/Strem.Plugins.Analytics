@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Strem.Core.Plugins;
-using Strem.Core.Services.Registries.Menus;
 using Strem.Flows.Extensions;
 using Strem.Infrastructure.Services;
 using Strem.Plugins.Analytics.Services.Database;
+using Strem.Plugins.Analytics.Services.Integrations;
 using Strem.Plugins.Analytics.Services.Repositories;
 
 namespace Strem.Plugins.Analytics.Plugin;
@@ -12,18 +12,11 @@ public class AnalyticsModule : IDependencyModule
 {
     public void Setup(IServiceCollection services)
     {
-        // Menus
-        services.AddSingleton(new MenuDescriptor
-        {
-            Priority = 5,
-            Title = "Analytics",
-            Code = "analytics-menu",
-            IconClass = "fas fa-chart-line",
-            PageUrl = "analytics"
-        });
-        
         // Plugin
         services.AddSingleton<IPluginStartup, AnalyticsPluginStartup>();
+        
+        // Analytics registry
+        services.AddSingleton<IAnalyticsIntegrationRegistry, AnalyticsIntegrationRegistry>();
         
         // Database
         SetupDatabase(services);

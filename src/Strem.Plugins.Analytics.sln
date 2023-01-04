@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strem.Plugins.Analytics.Twi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strem.Plugins.Analytics.UnitTests", "Strem.Plugins.Analytics.UnitTests\Strem.Plugins.Analytics.UnitTests.csproj", "{A5919748-56DC-475F-96E9-8FDC1183FD97}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strem.Plugins.Analytics.Viewer", "Strem.Plugins.Analytics.Viewer\Strem.Plugins.Analytics.Viewer.csproj", "{3B563DA4-A711-4B0D-B30D-CFD5BA0F0BDA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,6 +36,10 @@ Global
 		{A5919748-56DC-475F-96E9-8FDC1183FD97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A5919748-56DC-475F-96E9-8FDC1183FD97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A5919748-56DC-475F-96E9-8FDC1183FD97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B563DA4-A711-4B0D-B30D-CFD5BA0F0BDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B563DA4-A711-4B0D-B30D-CFD5BA0F0BDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B563DA4-A711-4B0D-B30D-CFD5BA0F0BDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B563DA4-A711-4B0D-B30D-CFD5BA0F0BDA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0C251599-E9B3-43FD-9698-A013FAB7A4C1} = {F5B33E50-F858-4F0F-A04E-92114B749515}

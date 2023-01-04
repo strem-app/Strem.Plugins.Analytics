@@ -3,9 +3,8 @@
 @using Microsoft.JSInterop
 @using Strem.Core.Extensions
 @using Strem.Core.State
-@using Strem.Plugins.Analytics.Extensions
 @using Microsoft.AspNetCore.Components
-
+@using Strem.Infrastructure.Services
 @inject IJSRuntime JS
 @inject IAppState AppState
 
@@ -122,9 +121,9 @@
         PreMadeSourceContext = string.IsNullOrEmpty(existingUsername) ? Array.Empty<string>() : new[] { existingUsername };
         SourceContext = string.IsNullOrEmpty(existingUsername) ? "" : existingUsername;
         
-        await JS.InvokeVoidAsync("loadJsFile", $"{PluginPathHelper.GetPluginStaticFileRootPath("Strem.Plugins.Analytics")}/js/apexcharts.fixed.js");
-        await JS.InvokeVoidAsync("loadJsFile", $"{PluginPathHelper.GetPluginStaticFileRootPath("Strem.Plugins.Analytics")}/_content/Blazor-ApexCharts/js/blazor-apex-charts.js");
-        await JS.InvokeVoidAsync("loadCssFile", $"{PluginPathHelper.GetPluginStaticFileRootPath("Strem.Plugins.Analytics")}/_content/Blazor-ApexCharts/css/apexcharts.css");
+        await JS.InvokeVoidAsync("loadJsFile", $"{StremPathHelper.GetPluginRootPath("Strem.Plugins.Analytics")}/js/apexcharts.fixed.js");
+        await JS.InvokeVoidAsync("loadJsFile", $"{StremPathHelper.GetPluginRootPath("Strem.Plugins.Analytics")}/_content/Blazor-ApexCharts/js/blazor-apex-charts.js");
+        await JS.InvokeVoidAsync("loadCssFile", $"{StremPathHelper.GetPluginRootPath("Strem.Plugins.Analytics")}/_content/Blazor-ApexCharts/css/apexcharts.css");
 
         HasLoadedChartLib = true;
     }

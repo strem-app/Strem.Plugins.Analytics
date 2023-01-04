@@ -1,0 +1,21 @@
+﻿@using Strem.Plugins.Analytics.Services.Integrations
+
+@inject IAnalyticsIntegrationRegistry AnalyticsIntegrationRegistry;
+
+<div class="block">
+@foreach (var analyticsIntegrations in AnalyticsIntegrationRegistry.GetAll())
+{
+    <Accordion Title="@analyticsIntegrations.Title" HeaderClasses="@analyticsIntegrations.Code" IsExpanded="true">
+        <DynamicComponent Type="analyticsIntegrations.ComponentType" />
+        @if (analyticsIntegrations.VariableOutputs.Length > 0)
+        {
+            <Accordion Title="Output Variables" HeaderClasses="is-info">
+                <VariableDescriptorList VariableDescriptors="analyticsIntegrations.VariableOutputs" />
+            </Accordion>
+        }
+    </Accordion>
+}
+</div>
+
+
+@code {}
