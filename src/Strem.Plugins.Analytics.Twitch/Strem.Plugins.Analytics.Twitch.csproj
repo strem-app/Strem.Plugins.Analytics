@@ -14,6 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Strem.Plugins.Analytics.Viewer\Strem.Plugins.Analytics.Viewer.csproj" />
       <ProjectReference Include="..\Strem.Plugins.Analytics\Strem.Plugins.Analytics.csproj" />
     </ItemGroup>
 

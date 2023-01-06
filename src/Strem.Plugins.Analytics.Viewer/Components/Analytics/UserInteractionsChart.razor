@@ -48,7 +48,8 @@ else
         return Data.Where(x =>
             x.EventType == AnalyticsEventTypes.ChatMessage ||
             x.EventType == AnalyticsEventTypes.UserLeft ||
-            x.EventType == AnalyticsEventTypes.UserJoined);
+            x.EventType == AnalyticsEventTypes.UserJoined ||
+            x.EventType == AnalyticsEventTypes.ViewerCount);
     }
 
     public override async Task Refresh()

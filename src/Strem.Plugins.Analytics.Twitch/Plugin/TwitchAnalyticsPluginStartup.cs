@@ -127,7 +127,7 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         var stream = streamInfo.Streams[0];
         var metric = new AnalyticsEvent()
         {
-            EventType = TwitchMetricTypes.ViewerCount,
+            EventType = TwitchAnalyticEventTypes.ViewerCount,
             EventDateTime = DateTime.Now,
             EventValue = stream.ViewerCount,
             SourceContext = stream.UserName,
@@ -148,7 +148,7 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         
         var interaction = new AnalyticsEvent
         {
-            EventType = TwitchMetricTypes.UserJoined,
+            EventType = TwitchAnalyticEventTypes.UserJoined,
             SourceContext = args.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.Username,
@@ -165,7 +165,7 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
 
         var metric = new AnalyticsEvent
         {
-            EventType = TwitchMetricTypes.Subscriptions,
+            EventType = TwitchAnalyticEventTypes.Subscriptions,
             SourceContext = args.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.Subscriber.DisplayName,
@@ -187,7 +187,7 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         
         var metric = new AnalyticsEvent
         {
-            EventType = TwitchMetricTypes.Subscriptions,
+            EventType = TwitchAnalyticEventTypes.Subscriptions,
             SourceContext = args.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.ReSubscriber.DisplayName,
@@ -210,7 +210,7 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         var numberOfMonths = GetMonthsFromString(args.GiftedSubscription.MsgParamMultiMonthGiftDuration);
         var metric = new AnalyticsEvent
         {
-            EventType = TwitchMetricTypes.Subscriptions,
+            EventType = TwitchAnalyticEventTypes.Subscriptions,
             SourceContext = args.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.GiftedSubscription.MsgParamRecipientUserName,
@@ -232,7 +232,7 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         
         var interaction = new AnalyticsEvent
         {
-            EventType = TwitchMetricTypes.UserLeft,
+            EventType = TwitchAnalyticEventTypes.UserLeft,
             SourceContext = args.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.Username,
@@ -249,7 +249,7 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         
         var interaction = new AnalyticsEvent
         {
-            EventType = TwitchMetricTypes.ChatMessage,
+            EventType = TwitchAnalyticEventTypes.ChatMessage,
             SourceContext = args.ChatMessage.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.ChatMessage.Username,
@@ -263,7 +263,7 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
 
         var metric = new AnalyticsEvent
         {
-            EventType = TwitchMetricTypes.Bits,
+            EventType = TwitchAnalyticEventTypes.Bits,
             UserContext = args.ChatMessage.Username,
             PlatformContext = TwitchPlatformContext,
             SourceContext = args.ChatMessage.Channel,

@@ -18,7 +18,7 @@
             @foreach (var topChatters in GenerateMetrics())
             {
                 <li>
-                    <span class="has-text-weight-bold">@topChatters.Key</span> <span>(@topChatters.Value @AnalyticsEventTypes.ChatMessage.GetNiceTypeName()s)</span>
+                    <span class="has-text-weight-bold">@topChatters.Key</span> <span>(@topChatters.Value Chatters)</span>
                 </li>
             }
         </ol>

@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Strem.Core.Plugins;
 using Strem.Flows.Extensions;
+using Strem.Plugins.Analytics.Services.Metrics;
 using Strem.Plugins.Analytics.Services.Settings;
+using Strem.Plugins.Analytics.Twitch.Plugin.ComponentDescriptors;
 
 namespace Strem.Plugins.Analytics.Twitch.Plugin;
 
@@ -14,6 +16,9 @@ public class TwitchAnalyticsModule : IDependencyModule
         
         // Analytics Integrations
         services.AddSingleton<IAnalyticsSettingsDescriptor, TwitchAnalyticsSettingsDescriptor>();
+        
+        // Analytics Components
+        services.AddSingleton<IAnalyticsComponentDescriptor, BitsChartDescriptor>();
         
         // Register Components
         var thisAssembly = GetType().Assembly;

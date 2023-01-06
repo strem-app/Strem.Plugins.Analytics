@@ -1,0 +1,76 @@
+﻿@using Strem.Plugins.Analytics.Models
+@using Strem.Plugins.Analytics.Types
+@using Strem.Plugins.Analytics.Extensions
+@using ApexCharts
+@using Strem.Plugins.Analytics.Twitch.Types
+
+@inherits Strem.Plugins.Analytics.Viewer.Components.ChartComponent
+
+<h3 class="title is-5 is-capitalized has-text-black">Bits Chart</h3>
+@if (Data.Count == 0)
+{
+    <p>No Data Available</p>
+}
+else
+{
+    <ApexChart TItem="AnalyticsEvent" Title="User Interactions" @ref="ChartInstance" Options="ChartOptions" Width="500" Height="300">
+    
+        <ApexPointSeries TItem="AnalyticsEvent" Items="GetBitData()" Name="Bits Spent" 
+                         SeriesType="SeriesType.Line" 
+                         XValue="@(e => e.EventDateTime.RoundToNearest(Filter.TimeUnitRounding))"
+                         YAggregate="@(e => e.Sum(x => x.EventValue))"
+                         OrderBy="x => x.X"/>
+        
+        <ApexPointSeries TItem="AnalyticsEvent" Items="GetViewerData()" Name="Viewer Count" 
+                         SeriesType="SeriesType.Line" 
+                         XValue="@(e => e.EventDateTime.RoundToNearest(Filter.TimeUnitRounding))"
+                         YAggregate="@(e => e.Average(x => x.EventValue))"
+                         OrderBy="x => x.X"/>
+    
+    </ApexChart>
+}
+
+@code {
+    
+    public ApexChart<AnalyticsEvent> ChartInstance { get; set; }
+    public ApexChartOptions<AnalyticsEvent> ChartOptions { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        ChartOptions.Xaxis = new XAxis()
+        {
+            Min = Filter.StartPeriod,
+            Max = Filter.EndPeriod,
+            Type = XAxisType.Datetime
+        };
+
+        ChartOptions.Yaxis = new List<YAxis>();
+        ChartOptions.Yaxis.Add(new YAxis()
+        {
+            Title = new AxisTitle() { Text = "Bits Spent" },
+            DecimalsInFloat = 0
+        });
+        
+        ChartOptions.Yaxis.Add(new YAxis()
+        {
+            Title = new AxisTitle() { Text = "Viewer Count" },
+            DecimalsInFloat = 0,
+            Opposite = true
+        });
+        
+        base.OnInitialized();
+    }
+
+    public IEnumerable<AnalyticsEvent> GetBitData()
+    {
+        return Data.Where(x => x.EventType == TwitchAnalyticEventTypes.Bits);
+    }
+    
+    public IEnumerable<AnalyticsEvent> GetViewerData()
+    {
+        return Data.Where(x => x.EventType == TwitchAnalyticEventTypes.ViewerCount);
+    }
+
+    public override async Task Refresh()
+    { await ChartInstance.RenderAsync(); }
+}

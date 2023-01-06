@@ -3,9 +3,7 @@ using Strem.Core.Plugins;
 using Strem.Core.Services.Registries.Integrations;
 using Strem.Core.Services.Registries.Menus;
 using Strem.Flows.Extensions;
-using Strem.Infrastructure.Services;
 using Strem.Plugins.Analytics.Services.Metrics;
-using Strem.Plugins.Analytics.Viewer.Components.General;
 using Strem.Plugins.Analytics.Viewer.Plugin.ComponentDescriptors;
 
 namespace Strem.Plugins.Analytics.Viewer.Plugin;
