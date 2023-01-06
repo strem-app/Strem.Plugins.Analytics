@@ -19,9 +19,5 @@
       <_ContentIncludedByDefault Remove="wwwroot\js\apexcharts.fixed.js" />
       <_ContentIncludedByDefault Remove="Pages\Analytics.razor" />
     </ItemGroup>
-    
-    <ItemGroup>
-      <Folder Include="Extensions" />
-    </ItemGroup>
 
 </Project>

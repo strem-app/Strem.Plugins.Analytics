@@ -4,6 +4,9 @@ using Strem.Core.Services.Registries.Integrations;
 using Strem.Core.Services.Registries.Menus;
 using Strem.Flows.Extensions;
 using Strem.Infrastructure.Services;
+using Strem.Plugins.Analytics.Services.Metrics;
+using Strem.Plugins.Analytics.Viewer.Components.General;
+using Strem.Plugins.Analytics.Viewer.Plugin.ComponentDescriptors;
 
 namespace Strem.Plugins.Analytics.Viewer.Plugin;
 
@@ -26,6 +29,10 @@ public class AnalyticsViewerModule : IDependencyModule
         
         // Integration Components
         services.AddSingleton<IIntegrationDescriptor, AnalyticsViewerIntegrationDescriptor>();
+        
+        // Analytics Components
+        services.AddSingleton<IAnalyticsComponentDescriptor, TopChattersDescriptor>();
+        services.AddSingleton<IAnalyticsComponentDescriptor, UserInteractionsChartDescriptor>();
         
         // Register Components
         var thisAssembly = GetType().Assembly;

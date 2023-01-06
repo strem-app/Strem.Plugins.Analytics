@@ -1,11 +1,12 @@
 ﻿namespace Strem.Plugins.Analytics.Models;
 
-public class StreamInteraction
+public record AnalyticsEvent
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     
-    public string InteractionType { get; set; }
-    public DateTime InteractionDateTime { get; set; }
+    public string EventType { get; set; }
+    public DateTime EventDateTime { get; set; }
+    public decimal EventValue { get; set; }
     
     public string UserContext { get; set; }
     public string SourceContext { get; set; }

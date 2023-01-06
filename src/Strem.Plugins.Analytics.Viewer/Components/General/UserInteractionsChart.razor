@@ -1,0 +1,56 @@
+﻿@using Strem.Plugins.Analytics.Models
+@using Strem.Plugins.Analytics.Types
+@using Strem.Plugins.Analytics.Extensions
+
+@inherits ChartComponent
+
+<h3 class="title is-5 is-capitalized has-text-black">User Interactions Chart</h3>
+@{ var filteredData = FilterData().ToArray(); }
+@if (filteredData.Length == 0)
+{
+    <p>No Data Available</p>
+}
+else
+{
+    <ApexChart TItem="AnalyticsEvent" Title="User Interactions" @ref="ChartInstance" Options="ChartOptions" Width="500" Height="300">
+    
+        @foreach (var perInteractionData in filteredData.GroupBy(x => x.EventType))
+        {
+            <ApexPointSeries TItem="AnalyticsEvent" Items="perInteractionData" Name="@perInteractionData.Key.GetNiceTypeName()" 
+                             SeriesType="SeriesType.Line"
+                             XValue="@(e => e.EventDateTime.RoundToNearest(Filter.TimeUnitRounding))"
+                             YAggregate="@(e => e.Count())"
+                             OrderBy="x => x.X"/>
+        }
+    
+    </ApexChart>
+}
+
+@code {
+    
+    public ApexChart<AnalyticsEvent> ChartInstance { get; set; }
+    public ApexChartOptions<AnalyticsEvent> ChartOptions { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        ChartOptions.Xaxis = new XAxis()
+        {
+            Min = Filter.StartPeriod,
+            Max = Filter.EndPeriod,
+            Type = XAxisType.Datetime
+        };
+        
+        base.OnInitialized();
+    }
+
+    public IEnumerable<AnalyticsEvent> FilterData()
+    {
+        return Data.Where(x =>
+            x.EventType == AnalyticsEventTypes.ChatMessage ||
+            x.EventType == AnalyticsEventTypes.UserLeft ||
+            x.EventType == AnalyticsEventTypes.UserJoined);
+    }
+
+    public override async Task Refresh()
+    { await ChartInstance.RenderAsync(); }
+}

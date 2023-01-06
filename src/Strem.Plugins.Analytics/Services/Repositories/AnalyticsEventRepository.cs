@@ -6,9 +6,9 @@ using Strem.Plugins.Analytics.Services.Database;
 
 namespace Strem.Plugins.Analytics.Services.Repositories;
 
-public class StreamInteractionRepository : Repository<StreamInteraction, Guid>, IStreamInteractionRepository
+public class AnalyticsEventRepository : Repository<AnalyticsEvent, Guid>, IAnalyticsEventRepository
 {
-    public StreamInteractionRepository(IAnalyticsDatabase connection) : base(connection, "stream_interactions")
+    public AnalyticsEventRepository(IAnalyticsDatabase connection) : base(connection, "analytics_events")
     {}
 
     public override BsonValue GetId(Guid id) => new(id);

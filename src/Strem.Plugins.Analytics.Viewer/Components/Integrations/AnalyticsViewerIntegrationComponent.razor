@@ -1,9 +1,9 @@
-﻿@using Strem.Plugins.Analytics.Services.Integrations
+﻿@using Strem.Plugins.Analytics.Services.Settings
 
-@inject IAnalyticsIntegrationRegistry AnalyticsIntegrationRegistry;
+@inject IAnalyticsSettingsRegistry AnalyticsSettingsRegistry;
 
 <div class="block">
-@foreach (var analyticsIntegrations in AnalyticsIntegrationRegistry.GetAll())
+@foreach (var analyticsIntegrations in AnalyticsSettingsRegistry.GetAll())
 {
     <Accordion Title="@analyticsIntegrations.Title" HeaderClasses="@analyticsIntegrations.Code" IsExpanded="true">
         <DynamicComponent Type="analyticsIntegrations.ComponentType" />

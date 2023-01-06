@@ -3,8 +3,9 @@ using Strem.Core.Plugins;
 using Strem.Flows.Extensions;
 using Strem.Infrastructure.Services;
 using Strem.Plugins.Analytics.Services.Database;
-using Strem.Plugins.Analytics.Services.Integrations;
+using Strem.Plugins.Analytics.Services.Metrics;
 using Strem.Plugins.Analytics.Services.Repositories;
+using Strem.Plugins.Analytics.Services.Settings;
 
 namespace Strem.Plugins.Analytics.Plugin;
 
@@ -16,7 +17,8 @@ public class AnalyticsModule : IDependencyModule
         services.AddSingleton<IPluginStartup, AnalyticsPluginStartup>();
         
         // Analytics registry
-        services.AddSingleton<IAnalyticsIntegrationRegistry, AnalyticsIntegrationRegistry>();
+        services.AddSingleton<IAnalyticsSettingsRegistry, AnalyticsSettingsRegistry>();
+        services.AddSingleton<IAnalyticsComponentRegistry, AnalyticsComponentRegistry>();
         
         // Database
         SetupDatabase(services);
@@ -35,7 +37,6 @@ public class AnalyticsModule : IDependencyModule
         var profile = "analytics";
         var dbPath = $"{StremPathHelper.StremDataDirectory}/{profile}.db";
         services.AddSingleton<IAnalyticsDatabase>(x => new AnalyticsDatabase(dbPath));
-        services.AddSingleton<IStreamMetricRepository, StreamMetricRepository>();
-        services.AddSingleton<IStreamInteractionRepository, StreamInteractionRepository>();
+        services.AddSingleton<IAnalyticsEventRepository, AnalyticsEventRepository>();
     }
 }

@@ -7,11 +7,11 @@ using Strem.Core.Plugins;
 using Strem.Core.State;
 using Strem.Plugins.Analytics.Models;
 using Strem.Plugins.Analytics.Services.Repositories;
+using Strem.Plugins.Analytics.Twitch.Types;
 using Strem.Plugins.Analytics.Twitch.Variables;
 using Strem.Plugins.Analytics.Types;
 using Strem.Twitch.Extensions;
 using Strem.Twitch.Services.Client;
-using Strem.Twitch.Variables;
 using TwitchLib.Api.Interfaces;
 using TwitchLib.Client.Events;
 
@@ -28,29 +28,21 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
     public ILogger<TwitchAnalyticsPluginStartup> Logger { get; }
     public IObservableTwitchClient TwitchClient { get; }
     public ITwitchAPI TwitchApiClient { get; }
-    public IStreamInteractionRepository InteractionRepository { get; }
-    public IStreamMetricRepository MetricRepository { get; }
+    public IAnalyticsEventRepository AnalyticsEventRepository { get; }
     
     public string[] RequiredConfigurationKeys { get; } = Array.Empty<string>();
 
-    public TwitchAnalyticsPluginStartup(IEventBus eventBus, IAppState appState, ILogger<TwitchAnalyticsPluginStartup> logger, IObservableTwitchClient twitchClient, ITwitchAPI twitchApiClient, IStreamInteractionRepository interactionRepository, IStreamMetricRepository metricRepository)
+    public TwitchAnalyticsPluginStartup(IEventBus eventBus, IAppState appState, ILogger<TwitchAnalyticsPluginStartup> logger, IObservableTwitchClient twitchClient, ITwitchAPI twitchApiClient, IAnalyticsEventRepository analyticsEventRepository)
     {
         EventBus = eventBus;
         AppState = appState;
         Logger = logger;
         TwitchClient = twitchClient;
         TwitchApiClient = twitchApiClient;
-        InteractionRepository = interactionRepository;
-        MetricRepository = metricRepository;
+        AnalyticsEventRepository = analyticsEventRepository;
     }
 
     public Task SetupPlugin() => Task.CompletedTask;
-
-    public bool MatchesAnalyticsChannels(string channel)
-    {
-        var channelsToMatch = AppState.AppVariables.Get(TwitchAnalyticsViewerVars.Channels);
-        return channelsToMatch.Contains(channel);
-    }
     
     public async Task StartPlugin()
     {
@@ -79,7 +71,7 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         TwitchClient.OnUserLeft
             .Subscribe(TrackLeftMetric)
             .AddTo(_subs);
-
+        
         AppState.AppVariables.OnVariableChanged
             .Where(x => x.Key == TwitchAnalyticsViewerVars.Channels)
             .Subscribe(x => JoinRequiredChannels())
@@ -93,10 +85,23 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
 
         Logger.Information("Finished Twitch Analytics Tracking Setup");
     }
+    
+    public bool MatchesAnalyticsChannels(string channel)
+    {
+        var channelsToMatch = AppState.AppVariables.Get(TwitchAnalyticsViewerVars.Channels);
+        return channelsToMatch.Contains(channel, StringComparison.OrdinalIgnoreCase);
+    }
 
+    public int GetMonthsFromString(string monthsString)
+    {
+        int.TryParse(monthsString, out var numberOfMonths);
+        if (numberOfMonths == 0) { numberOfMonths = 1; }
+        return numberOfMonths;
+    }
+    
     public void JoinRequiredChannels()
     {
-        if (!AppState.HasTwitchOAuth()) { return; }
+        if (!TwitchClient.Client.IsConnected) { return; }
 
         var channelsToJoin = AppState.AppVariables.Get(TwitchAnalyticsViewerVars.Channels);
         if(string.IsNullOrEmpty(channelsToJoin)) { return; }
@@ -113,22 +118,18 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
 
     private async Task TrackViewerMetrics()
     {
-        if (!AppState.HasTwitchOAuth()) { return; }
+        if (!TwitchClient.Client.IsConnected) { return; }
         
-        var twitchUsername = AppState.GetTwitchUsername();
-        if (!MatchesAnalyticsChannels(twitchUsername)) { return; }
-
-        var twitchUserId = AppState.GetTwitchUserId();
-        var userIds = new List<string>() { twitchUserId };
-        var streamInfo = await TwitchApiClient.Helix.Streams.GetStreamsAsync(userIds: userIds);
+        var analyticsChannel = AppState.AppVariables.Get(TwitchAnalyticsViewerVars.Channels);
+        var streamInfo = await TwitchApiClient.Helix.Streams.GetStreamsAsync(userLogins: new List<string>() { analyticsChannel });
         if(streamInfo.Streams.Length == 0) { return; }
 
         var stream = streamInfo.Streams[0];
-        var metric = new StreamMetric
+        var metric = new AnalyticsEvent()
         {
-            MetricType = MetricTypes.ViewerCount,
-            MetricDateTime = DateTime.Now,
-            MetricValue = stream.ViewerCount,
+            EventType = TwitchMetricTypes.ViewerCount,
+            EventDateTime = DateTime.Now,
+            EventValue = stream.ViewerCount,
             SourceContext = stream.UserName,
             PlatformContext = TwitchPlatformContext,
             Metadata = new Dictionary<string, string>()
@@ -138,158 +139,139 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             }
         };
         
-        MetricRepository.Create(metric.Id, metric);
+        AnalyticsEventRepository.Create(metric.Id, metric);
     }
 
     private void TrackJoiningMetric(OnUserJoinedArgs args)
     {
         if (!MatchesAnalyticsChannels(args.Channel)) { return; }
         
-        var interaction = new StreamInteraction
+        var interaction = new AnalyticsEvent
         {
-            InteractionType = InteractionTypes.UserJoined,
+            EventType = TwitchMetricTypes.UserJoined,
             SourceContext = args.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.Username,
-            InteractionDateTime = DateTime.Now,
-            Metadata = new Dictionary<string, string>()
-            {
-                { "category", AppState.TransientVariables.Get(TwitchVars.ChannelGame) },
-                { "title", AppState.TransientVariables.Get(TwitchVars.ChannelTitle) }
-            }
+            EventDateTime = DateTime.Now,
+            Metadata = new Dictionary<string, string>() {}
         };
         
-        InteractionRepository.Create(interaction.Id, interaction);
+        AnalyticsEventRepository.Create(interaction.Id, interaction);
     }
 
     private void TrackNewSubscriptionMetric(OnNewSubscriberArgs args)
     {
         if (!MatchesAnalyticsChannels(args.Channel)) { return; }
-        
-        var metric = new StreamMetric
+
+        var metric = new AnalyticsEvent
         {
-            MetricType = MetricTypes.Currency,
+            EventType = TwitchMetricTypes.Subscriptions,
             SourceContext = args.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.Subscriber.DisplayName,
-            MetricDateTime = DateTime.Now,
+            EventDateTime = DateTime.Now,
+            EventValue = 1,
             Metadata = new Dictionary<string, string>()
             {
-                { "category", AppState.TransientVariables.Get(TwitchVars.ChannelGame) },
-                { "title", AppState.TransientVariables.Get(TwitchVars.ChannelTitle) },
-                { "sub-length",  "1" },
-                { "sub-type",  args.Subscriber.SubscriptionPlanName }
+                { "subs-to-date", args.Subscriber.MsgParamCumulativeMonths },
+                { "sub-type", args.Subscriber.SubscriptionPlanName }
             }
         };
         
-        MetricRepository.Create(metric.Id, metric);
+        AnalyticsEventRepository.Create(metric.Id, metric);
     }
-    
+
     private void TrackReSubscriptionMetric(OnReSubscriberArgs args)
     {
         if (!MatchesAnalyticsChannels(args.Channel)) { return; }
         
-        var metric = new StreamMetric
+        var metric = new AnalyticsEvent
         {
-            MetricType = MetricTypes.Currency,
+            EventType = TwitchMetricTypes.Subscriptions,
             SourceContext = args.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.ReSubscriber.DisplayName,
-            MetricDateTime = DateTime.Now,
+            EventDateTime = DateTime.Now,
+            EventValue = 1,
             Metadata = new Dictionary<string, string>()
             {
-                { "category", AppState.TransientVariables.Get(TwitchVars.ChannelGame) },
-                { "title", AppState.TransientVariables.Get(TwitchVars.ChannelTitle) },
-                { "sub-length",  args.ReSubscriber.Months.ToString() },
-                { "sub-type",  args.ReSubscriber.SubscriptionPlan.ToString() }
+                { "subs-to-date",  args.ReSubscriber.MsgParamCumulativeMonths },
+                { "sub-type",  args.ReSubscriber.SubscriptionPlanName }
             }
         };
         
-        MetricRepository.Create(metric.Id, metric);
+        AnalyticsEventRepository.Create(metric.Id, metric);
     }
     
     private void TrackGiftSubscriptionMetric(OnGiftedSubscriptionArgs args)
     {
         if (!MatchesAnalyticsChannels(args.Channel)) { return; }
         
-        var metric = new StreamMetric
+        var numberOfMonths = GetMonthsFromString(args.GiftedSubscription.MsgParamMultiMonthGiftDuration);
+        var metric = new AnalyticsEvent
         {
-            MetricType = MetricTypes.Currency,
+            EventType = TwitchMetricTypes.Subscriptions,
             SourceContext = args.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.GiftedSubscription.MsgParamRecipientUserName,
-            MetricDateTime = DateTime.Now,
+            EventValue = numberOfMonths,
+            EventDateTime = DateTime.Now,
             Metadata = new Dictionary<string, string>()
             {
-                { "category", AppState.TransientVariables.Get(TwitchVars.ChannelGame) },
-                { "title", AppState.TransientVariables.Get(TwitchVars.ChannelTitle) },
-                { "sub-length",  args.GiftedSubscription.MsgParamMultiMonthGiftDuration },
-                { "sub-type",  args.GiftedSubscription.MsgParamSubPlan.ToString() },
-                { "gifter", args.GiftedSubscription.DisplayName}
+                { "sub-type",  args.GiftedSubscription.MsgParamSubPlanName },
+                { "gifter", args.GiftedSubscription.DisplayName }
             }
         };
         
-        MetricRepository.Create(metric.Id, metric);
+        AnalyticsEventRepository.Create(metric.Id, metric);
     }
     
     private void TrackLeftMetric(OnUserLeftArgs args)
     {
         if (!MatchesAnalyticsChannels(args.Channel)) { return; }
         
-        var interaction = new StreamInteraction
+        var interaction = new AnalyticsEvent
         {
-            InteractionType = InteractionTypes.UserLeft,
+            EventType = TwitchMetricTypes.UserLeft,
             SourceContext = args.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.Username,
-            InteractionDateTime = DateTime.Now,
-            Metadata = new Dictionary<string, string>()
-            {
-                { "category", AppState.TransientVariables.Get(TwitchVars.ChannelGame) },
-                { "title", AppState.TransientVariables.Get(TwitchVars.ChannelTitle) }
-            }
+            EventDateTime = DateTime.Now,
+            Metadata = new Dictionary<string, string>(){}
         };
         
-        InteractionRepository.Create(interaction.Id, interaction);
+        AnalyticsEventRepository.Create(interaction.Id, interaction);
     }
 
     private void TrackMessageMetrics(OnMessageReceivedArgs args)
     {
         if (!MatchesAnalyticsChannels(args.ChatMessage.Channel)) { return; }
         
-        Logger.Information("Tracking message metric");
-        var interaction = new StreamInteraction
+        var interaction = new AnalyticsEvent
         {
-            InteractionType = InteractionTypes.ChatMessage,
+            EventType = TwitchMetricTypes.ChatMessage,
             SourceContext = args.ChatMessage.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.ChatMessage.Username,
-            InteractionDateTime = DateTime.Now,
-            Metadata = new Dictionary<string, string>()
-            {
-                { "category", AppState.TransientVariables.Get(TwitchVars.ChannelGame) },
-                { "title", AppState.TransientVariables.Get(TwitchVars.ChannelTitle) }
-            }
+            EventDateTime = DateTime.Now,
+            Metadata = new Dictionary<string, string>() { }
         };
-        InteractionRepository.Create(interaction.Id, interaction);
+        AnalyticsEventRepository.Create(interaction.Id, interaction);
 
         if (args.ChatMessage.Bits == 0)
         { return; }
 
-        var metric = new StreamMetric
+        var metric = new AnalyticsEvent
         {
-            MetricType = MetricTypes.Currency,
+            EventType = TwitchMetricTypes.Bits,
             UserContext = args.ChatMessage.Username,
             PlatformContext = TwitchPlatformContext,
             SourceContext = args.ChatMessage.Channel,
-            MetricDateTime = DateTime.Now,
-            Metadata = new Dictionary<string, string>()
-            {
-                { "category", AppState.TransientVariables.Get(TwitchVars.ChannelGame) },
-                { "title", AppState.TransientVariables.Get(TwitchVars.ChannelTitle) }
-            }
+            EventValue = args.ChatMessage.Bits,
+            EventDateTime = DateTime.Now,
+            Metadata = new Dictionary<string, string>() { }
         };
-        MetricRepository.Create(metric.Id, metric);
+        AnalyticsEventRepository.Create(metric.Id, metric);
     }
 
     public void Dispose()

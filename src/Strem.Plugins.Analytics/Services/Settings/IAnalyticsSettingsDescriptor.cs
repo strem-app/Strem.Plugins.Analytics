@@ -1,8 +1,8 @@
 ﻿using Strem.Core.Variables;
 
-namespace Strem.Plugins.Analytics.Services.Integrations;
+namespace Strem.Plugins.Analytics.Services.Settings;
 
-public interface IAnalyticsIntegrationDescriptor
+public interface IAnalyticsSettingsDescriptor
 {
     public string Title { get; }
     public string Code { get; }

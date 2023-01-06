@@ -4,46 +4,70 @@
 @using Strem.Core.Extensions
 @using Strem.Core.State
 @using Microsoft.AspNetCore.Components
+@using Strem.Core.Types
 @using Strem.Infrastructure.Services
+@using Strem.Plugins.Analytics.Models
+@using Strem.Plugins.Analytics.Models.Filtering
+@using Strem.Plugins.Analytics.Services.Metrics
+@using Strem.Plugins.Analytics.Services.Repositories
+@using Strem.Plugins.Analytics.Services.Repositories.Queries
+
 @inject IJSRuntime JS
 @inject IAppState AppState
+@inject IAnalyticsComponentRegistry ComponentRegistry
+@inject IAnalyticsEventRepository AnalyticsRepository
 
 <div class="container is-fluid">
     <ErrorBoundary>
         <ChildContent>
-            <h3 class="title is-3">Analytics</h3>
+            
+            <h3 class="title is-3">Analytics Dashboard</h3>
             <div class="box has-background-grey-dark">
-                <div class="box has-background-info">
+                <Accordion Title="Analytics Settings" HeaderClasses="is-info" IsExpanded="true">
                     <div class="columns">
                         <div class="column">
                             <div class="field">
-                                <label class="label has-text-white">Date Range</label>
+                                <label class="label">Date Range</label>
                                 <div class="field is-grouped">
                                     <div class="control">
-                                        <input type="datetime-local" class="input" value="@StartPeriod.ToString("s")" @onchange="x => UpdateStartPeriod(x.Value.ToString())"/>
+                                        <input type="datetime-local" class="input" value="@Filter.StartPeriod.ToString("s")" @onchange="x => UpdateStartPeriod(x.Value.ToString())"/>
                                     </div>
                                     <div class="control">
-                                        <div class="divider is-vertical has-text-white">To</div>
+                                        <div class="divider is-vertical">To</div>
                                     </div>
                                     <div class="control">
-                                        <input type="datetime-local" class="input" value="@EndPeriod.ToString("s")" @onchange="x => UpdateEndPeriod(x.Value.ToString())"/>
+                                        <input type="datetime-local" class="input" value="@Filter.EndPeriod.ToString("s")" @onchange="x => UpdateEndPeriod(x.Value.ToString())"/>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="column">
-                            <div class="field">
-                                <label class="label has-text-white">Platform</label>
+                            <label class="label">Date Rounding</label>
+                            <div class="field has-addons">
                                 <div class="control">
-                                    <AutoComplete Data="@PreMadePlatformContext" @bind-Value="@PlatformContext" />
+                                    <EnumSelectInput @bind-Value="Filter.TimeUnitRounding.TimeUnit" T="TimeUnitType" ValueChangedWithPrevious="() => InvokeAsync(RefreshComponents)"/>
+                                </div>
+                                <div class="control is-expanded">
+                                    <IntInput @bind-Value="Filter.TimeUnitRounding.UnitValue" ValueChangedWithPrevious="() => InvokeAsync(RefreshComponents)"/>
+                                </div>
+                            </div>
+                            <HelperInfo>This lets you round the time up to intervals, i.e 15 minutes means it will group data into 15 minute intervals, or 2 hours etc</HelperInfo>
+                        </div>
+                    </div>
+                    <div class="columns">
+                        <div class="column">
+                            <div class="field">
+                                <label class="label">Platform</label>
+                                <div class="control">
+                                    <AutoComplete Data="@PreMadePlatformContext" @bind-Value="@Filter.PlatformContext"/>
                                 </div>
                             </div>
                         </div>
                         <div class="column">
                             <div class="field">
-                                <label class="label has-text-white">Source/Channel</label>
+                                <label class="label">Source/Channel</label>
                                 <div class="control">
-                                    <AutoComplete Data="@PreMadeSourceContext" @bind-Value="@SourceContext" />
+                                    <AutoComplete Data="@PreMadeSourceContext" @bind-Value="@Filter.SourceContext"/>
                                 </div>
                             </div>
                         </div>
@@ -51,40 +75,42 @@
                     <div class="columns">
                         <div class="column">
                             <div class="field">
-                                <label class="label has-text-white">Display Type</label>
+                                <label class="label">Available Components</label>
                                 <div class="control">
-                                    <div class="field has-addons">
-                                        <p class="control">
-                                            <button class="button @(AnalyticsType == AnalyticsTypes.Interactions ? "is-success" : "")" @onclick="() => AnalyticsType = AnalyticsTypes.Interactions">
+                                    <div class="buttons">
+                                        @foreach (var availableComponent in ComponentRegistry.GetApplicable(Filter))
+                                        {
+                                            <button class="button @(IsComponentActive(availableComponent.Code) ? "is-success" : "")" @onclick="() => ToggleComponent(availableComponent.Code)">
                                                 <span class="icon is-small">
-                                                    <i class="fas fa-align-left"></i>
+                                                    <i class="fas @(IsChartComponent(availableComponent.ComponentType) ? "fa-chart-line" : "fa-solid fa-square-poll-horizontal")"></i>
                                                 </span>
-                                                <span>Interactions</span>
+                                                <span>@availableComponent.Title</span>
                                             </button>
-                                        </p>
-                                        <p class="control">
-                                            <button class="button @(AnalyticsType == AnalyticsTypes.Metrics ? "is-success" : "")" @onclick="() => AnalyticsType = AnalyticsTypes.Metrics">
-                                                <span class="icon is-small">
-                                                    <i class="fas fa-align-center"></i>
-                                                </span>
-                                                <span>Metrics</span>
-                                            </button>
-                                        </p>
+                                        }
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </Accordion>
+
                 <div>
-                    @if (HasLoadedChartLib && AnalyticsType == AnalyticsTypes.Interactions)
-                    {
-                        <InteractionChart StartPeriod="@StartPeriod" EndPeriod="@EndPeriod" PlatformContext="@PlatformContext" SourceContext="@SourceContext"/>
-                    }
-                    else if (HasLoadedChartLib && AnalyticsType == AnalyticsTypes.Metrics)
-                    {
-                        <MetricsChart StartPeriod="@StartPeriod" EndPeriod="@EndPeriod" PlatformContext="@PlatformContext" SourceContext="@SourceContext"/>
-                    }
+                    <div class="is-flex is-flex-direction-row is-flex-wrap-wrap">
+                        @{
+                            var filteredData = FilterData();
+                            Dictionary<string, object> componentProps = new()
+                            {
+                                { "Data", filteredData },
+                                { "Filter", Filter },
+                            };
+                        }
+                        @foreach (var component in ComponentRegistry.GetApplicable(Filter).Where(x => IsComponentActive(x.Code)))
+                        {
+                            <div class="analytics-component m-3 box is-flex is-flex-direction-column">
+                                <DynamicComponent Type="component.ComponentType" Parameters="@componentProps"/>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         </ChildContent>
@@ -95,42 +121,64 @@
 </div>
 
 @code {
-
-    public enum AnalyticsTypes
-    {
-        Interactions,
-        Metrics
-    }
     
     public bool HasLoadedChartLib { get; set; }
-    public AnalyticsTypes AnalyticsType { get; set; }
-    
-    public DateTime StartPeriod { get; set; } = DateTime.Now.GetStartOfMonth();
-    public DateTime EndPeriod { get; set; } = DateTime.Now.GetEndOfMonth();
-    public string PlatformContext { get; set; } = "twitch";
-    public string SourceContext { get; set; } = string.Empty;
+    public List<string> ActiveComponents { get; set; } = new();
+    public AnalyticsFilter Filter { get; set; } = new();
     
     public string[] PreMadePlatformContext { get; set; }
     public string[] PreMadeSourceContext { get; set; }
-
+    
     protected override async Task OnInitializedAsync()
     {
         PreMadePlatformContext = new[] { "twitch" };
-
+        Filter.StartPeriod = DateTime.Now.AddDays(-1).GetStartOfDay();
+        Filter.EndPeriod = DateTime.Now.GetEndOfDay();
+        Filter.PlatformContext = "twitch";
+            
         var existingUsername = AppState.AppVariables.Get("username", "twitch");
         PreMadeSourceContext = string.IsNullOrEmpty(existingUsername) ? Array.Empty<string>() : new[] { existingUsername };
-        SourceContext = string.IsNullOrEmpty(existingUsername) ? "" : existingUsername;
+        Filter.SourceContext = string.IsNullOrEmpty(existingUsername) ? "" : existingUsername;
         
-        await JS.InvokeVoidAsync("loadJsFile", $"{StremPathHelper.GetPluginRootPath("Strem.Plugins.Analytics")}/js/apexcharts.fixed.js");
-        await JS.InvokeVoidAsync("loadJsFile", $"{StremPathHelper.GetPluginRootPath("Strem.Plugins.Analytics")}/_content/Blazor-ApexCharts/js/blazor-apex-charts.js");
-        await JS.InvokeVoidAsync("loadCssFile", $"{StremPathHelper.GetPluginRootPath("Strem.Plugins.Analytics")}/_content/Blazor-ApexCharts/css/apexcharts.css");
+        await JS.InvokeVoidAsync("loadJsFile", $"{StremPathHelper.GetPluginRootPath("Strem.Plugins.Analytics.Viewer")}/wwwroot/js/apexcharts.fixed.js");
+        await JS.InvokeVoidAsync("loadJsFile", $"{StremPathHelper.GetPluginRootPath("Strem.Plugins.Analytics.Viewer")}/wwwroot/_content/Blazor-ApexCharts/js/blazor-apex-charts.js");
+        await JS.InvokeVoidAsync("loadCssFile", $"{StremPathHelper.GetPluginRootPath("Strem.Plugins.Analytics.Viewer")}/wwwroot/_content/Blazor-ApexCharts/css/apexcharts.css");
+        await JS.InvokeVoidAsync("loadCssFile", $"{StremPathHelper.GetPluginRootPath("Strem.Plugins.Analytics.Viewer")}/wwwroot/css/analytics-styles.css");
 
         HasLoadedChartLib = true;
     }
-    
+
     public void UpdateStartPeriod(string newDate)
-    { StartPeriod = DateTime.Parse(newDate); }
+    {
+        Filter.StartPeriod = DateTime.Parse(newDate);
+        InvokeAsync(RefreshComponents);
+    }
 
     public void UpdateEndPeriod(string newDate)
-    { EndPeriod = DateTime.Parse(newDate); }
+    {
+        Filter.EndPeriod = DateTime.Parse(newDate);
+        InvokeAsync(RefreshComponents);
+    }
+
+    public void ToggleComponent(string componentCode)
+    {
+        if (ActiveComponents.Contains(componentCode))
+        { ActiveComponents.Remove(componentCode); }
+        else
+        { ActiveComponents.Add(componentCode); }
+    }
+
+    public bool IsComponentActive(string componentCode)
+    { return ActiveComponents.Contains(componentCode); }
+
+    public bool IsChartComponent(Type componentType)
+    { return componentType.IsSubclassOf(typeof(ChartComponent));}
+
+    public IReadOnlyCollection<AnalyticsEvent> FilterData()
+    { return AnalyticsRepository.Query(new GetAnalyticsEventsQuery(Filter)).ToArray(); }
+
+    public async Task RefreshComponents()
+    {
+        
+    }
 }
