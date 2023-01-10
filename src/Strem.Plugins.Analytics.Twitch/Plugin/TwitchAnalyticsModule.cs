@@ -19,6 +19,7 @@ public class TwitchAnalyticsModule : IDependencyModule
         
         // Analytics Components
         services.AddSingleton<IAnalyticsComponentDescriptor, BitsChartDescriptor>();
+        services.AddSingleton<IAnalyticsComponentDescriptor, TopCategoriesChartDescriptor>();
         
         // Register Components
         var thisAssembly = GetType().Assembly;

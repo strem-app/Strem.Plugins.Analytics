@@ -1,57 +1,115 @@
 ﻿@using Strem.Plugins.Analytics.Models
 @using Strem.Plugins.Analytics.Types
 @using Strem.Plugins.Analytics.Extensions
+@using Strem.Plugins.Analytics.Models.Filtering
 
 @inherits ChartComponent
 
 <h3 class="title is-5 is-capitalized has-text-black">User Interactions Chart</h3>
-@{ var filteredData = FilterData().ToArray(); }
-@if (filteredData.Length == 0)
+@if (Data.Count == 0)
 {
     <p>No Data Available</p>
 }
 else
 {
-    <ApexChart TItem="AnalyticsEvent" Title="User Interactions" @ref="ChartInstance" Options="ChartOptions" Width="500" Height="300">
+    <ApexChart TItem="InteractionMetric" Title="User Interactions" @ref="ChartInstance" Options="ChartOptions" Width="500" Height="300">
     
-        @foreach (var perInteractionData in filteredData.GroupBy(x => x.EventType))
-        {
-            <ApexPointSeries TItem="AnalyticsEvent" Items="perInteractionData" Name="@perInteractionData.Key.GetNiceTypeName()" 
-                             SeriesType="SeriesType.Line"
-                             XValue="@(e => e.EventDateTime.RoundToNearest(Filter.TimeUnitRounding))"
-                             YAggregate="@(e => e.Count())"
-                             OrderBy="x => x.X"/>
-        }
+        @{ var metrics = GetMetrics().ToArray(); }
+        
+        <ApexPointSeries TItem="InteractionMetric" Name="Chat Messages"
+                         Items="metrics"
+                         SeriesType="SeriesType.Line" XValue="@(e => e.Date)" YValue="@(e => e.ChatCount)" 
+                         OrderBy="x => x.X"/>
+        
+        <ApexPointSeries TItem="InteractionMetric" Name="Users Joined"
+                         Items="metrics"
+                         SeriesType="SeriesType.Line" XValue="@(e => e.Date)" YValue="@(e => e.UsersJoined)" 
+                         OrderBy="x => x.X"/>
+        
+        <ApexPointSeries TItem="InteractionMetric" Name="Users Left"
+                         Items="metrics"
+                         SeriesType="SeriesType.Line" XValue="@(e => e.Date)" YValue="@(e => e.UsersLeft)" 
+                         OrderBy="x => x.X"/>
+        
+        
+        <ApexPointSeries TItem="InteractionMetric" Name="Viewer Count" 
+                         Items="metrics" 
+                         SeriesType="SeriesType.Line" XValue="@(e => e.Date)" YValue="@(e => e.Viewers)" 
+                         OrderBy="x => x.X"/>
     
     </ApexChart>
 }
 
 @code {
     
-    public ApexChart<AnalyticsEvent> ChartInstance { get; set; }
-    public ApexChartOptions<AnalyticsEvent> ChartOptions { get; set; } = new();
+    public record InteractionMetric(DateTime Date, int Viewers, int ChatCount, int UsersJoined, int UsersLeft);
+    
+    public ApexChart<InteractionMetric> ChartInstance { get; set; }
+    public ApexChartOptions<InteractionMetric> ChartOptions { get; set; } = new();
 
     protected override void OnInitialized()
     {
         ChartOptions.Xaxis = new XAxis()
         {
-            Min = Filter.StartPeriod,
-            Max = Filter.EndPeriod,
             Type = XAxisType.Datetime
         };
+        
+        ChartOptions.Yaxis = new List<YAxis>();
+        ChartOptions.Yaxis.Add(new YAxis()
+        {
+            Title = new AxisTitle() { Text = "User Interactions" },
+            DecimalsInFloat = 0,
+            SeriesName = "1",
+            Show = true
+        });
+        
+        ChartOptions.Yaxis.Add(new YAxis()
+        {
+            SeriesName = "1",
+            Show = false,
+        });
+        
+        ChartOptions.Yaxis.Add(new YAxis()
+        {
+            SeriesName = "1",
+            ShowForNullSeries = false,
+        });
+        
+        ChartOptions.Yaxis.Add(new YAxis()
+        {
+            Title = new AxisTitle() { Text = "Viewer Count" },
+            SeriesName = "2",
+            Opposite = true,
+            DecimalsInFloat = 0
+        });
         
         base.OnInitialized();
     }
 
-    public IEnumerable<AnalyticsEvent> FilterData()
+    public IEnumerable<InteractionMetric> GetMetrics()
     {
-        return Data.Where(x =>
-            x.EventType == AnalyticsEventTypes.ChatMessage ||
-            x.EventType == AnalyticsEventTypes.UserLeft ||
-            x.EventType == AnalyticsEventTypes.UserJoined ||
-            x.EventType == AnalyticsEventTypes.ViewerCount);
+        return Data
+            .Where(x => 
+                x.EventType == AnalyticsEventTypes.ChatMessage ||
+                x.EventType == AnalyticsEventTypes.UserJoined ||
+                x.EventType == AnalyticsEventTypes.UserLeft ||
+                x.EventType == AnalyticsEventTypes.ViewerCount)
+            .GroupBy(x => x.EventDateTime.RoundToNearest(Filter.TimeUnitRounding))
+            .Select(x =>
+            {
+                var viewerCount = x?
+                    .Where(y => y.EventType == AnalyticsEventTypes.ViewerCount)
+                    .DefaultIfEmpty()
+                    .Average(y => y?.EventValue ?? 0) ?? 0;
+                
+                var chatCount = x?.Count(y => y.EventType == AnalyticsEventTypes.ChatMessage) ?? 0;
+                var joinCount = x?.Count(y => y.EventType == AnalyticsEventTypes.UserJoined) ?? 0;
+                var leftCount = x?.Count(y => y.EventType == AnalyticsEventTypes.UserLeft) ?? 0;
+                
+                return new InteractionMetric(x.Key, (int)viewerCount, chatCount, joinCount, leftCount);
+            });
     }
-
+    
     public override async Task Refresh()
     { await ChartInstance.RenderAsync(); }
 }

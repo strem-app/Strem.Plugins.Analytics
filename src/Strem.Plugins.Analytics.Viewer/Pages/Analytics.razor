@@ -97,14 +97,25 @@
                 <div>
                     <div class="is-flex is-flex-direction-row is-flex-wrap-wrap">
                         @{
-                            var filteredData = FilterData();
-                            Dictionary<string, object> componentProps = new()
+                            var applicableComponents = ComponentRegistry
+                                .GetApplicable(Filter)
+                                .Where(x => IsComponentActive(x.Code))
+                                .ToArray();
+
+                            Dictionary<string, object> componentProps = null;
+                            
+                            if (applicableComponents.Length > 0)
                             {
-                                { "Data", filteredData },
-                                { "Filter", Filter },
-                            };
+                                var filteredData = FilterData();
+                                componentProps = new()
+                                {
+                                    { "Data", filteredData },
+                                    { "Filter", Filter },
+                                };
+                            }
                         }
-                        @foreach (var component in ComponentRegistry.GetApplicable(Filter).Where(x => IsComponentActive(x.Code)))
+                        
+                        @foreach (var component in applicableComponents)
                         {
                             <div class="analytics-component m-3 box is-flex is-flex-direction-column">
                                 <DynamicComponent Type="component.ComponentType" Parameters="@componentProps"/>

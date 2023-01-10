@@ -1,7 +1,7 @@
 ﻿@using Strem.Plugins.Analytics.Models
-@using Strem.Plugins.Analytics.Types
 @using Strem.Plugins.Analytics.Extensions
 @using ApexCharts
+@using Strem.Plugins.Analytics.Models.Filtering
 @using Strem.Plugins.Analytics.Twitch.Types
 
 @inherits Strem.Plugins.Analytics.Viewer.Components.ChartComponent
@@ -13,34 +13,28 @@
 }
 else
 {
-    <ApexChart TItem="AnalyticsEvent" Title="User Interactions" @ref="ChartInstance" Options="ChartOptions" Width="500" Height="300">
+    <ApexChart TItem="TimedMetric" Title="Bits Chart" @ref="ChartInstance" Options="ChartOptions" Width="500" Height="300">
     
-        <ApexPointSeries TItem="AnalyticsEvent" Items="GetBitData()" Name="Bits Spent" 
-                         SeriesType="SeriesType.Line" 
-                         XValue="@(e => e.EventDateTime.RoundToNearest(Filter.TimeUnitRounding))"
-                         YAggregate="@(e => e.Sum(x => x.EventValue))"
-                         OrderBy="x => x.X"/>
+        <ApexPointSeries TItem="TimedMetric" Items="GetBitData()" Name="Bits Spent" 
+              SeriesType="SeriesType.Bar" XValue="@(e => e.Date)" YValue="@(e => e.Value)" 
+              OrderBy="x => x.X"/>
         
-        <ApexPointSeries TItem="AnalyticsEvent" Items="GetViewerData()" Name="Viewer Count" 
-                         SeriesType="SeriesType.Line" 
-                         XValue="@(e => e.EventDateTime.RoundToNearest(Filter.TimeUnitRounding))"
-                         YAggregate="@(e => e.Average(x => x.EventValue))"
-                         OrderBy="x => x.X"/>
+        <ApexPointSeries TItem="TimedMetric" Items="GetViewerData()" Name="Viewer Count" 
+              SeriesType="SeriesType.Bar" XValue="@(e => e.Date)" YValue="@(e => e.Value)" 
+              OrderBy="x => x.X"/>
     
     </ApexChart>
 }
 
 @code {
     
-    public ApexChart<AnalyticsEvent> ChartInstance { get; set; }
-    public ApexChartOptions<AnalyticsEvent> ChartOptions { get; set; } = new();
+    public ApexChart<TimedMetric> ChartInstance { get; set; }
+    public ApexChartOptions<TimedMetric> ChartOptions { get; set; } = new();
 
     protected override void OnInitialized()
     {
         ChartOptions.Xaxis = new XAxis()
         {
-            Min = Filter.StartPeriod,
-            Max = Filter.EndPeriod,
             Type = XAxisType.Datetime
         };
 
@@ -61,16 +55,20 @@ else
         base.OnInitialized();
     }
 
-    public IEnumerable<AnalyticsEvent> GetBitData()
+    public IEnumerable<TimedMetric> GetBitData()
     {
-        return Data.Where(x => x.EventType == TwitchAnalyticEventTypes.Bits);
+        return Data.Where(x => x.EventType == TwitchAnalyticEventTypes.Bits)
+            .GroupBy(x => x.EventDateTime.RoundToNearest(Filter.TimeUnitRounding))
+            .Select(x => new TimedMetric(x.Key, x.Sum(y => y.EventValue)));
     }
     
-    public IEnumerable<AnalyticsEvent> GetViewerData()
+    public IEnumerable<TimedMetric> GetViewerData()
     {
-        return Data.Where(x => x.EventType == TwitchAnalyticEventTypes.ViewerCount);
+        return Data.Where(x => x.EventType == TwitchAnalyticEventTypes.ViewerCount)
+            .GroupBy(x => x.EventDateTime.RoundToNearest(Filter.TimeUnitRounding))
+            .Select(x => new TimedMetric(x.Key, x.Average(y => y.EventValue)));
     }
-
+    
     public override async Task Refresh()
     { await ChartInstance.RenderAsync(); }
 }

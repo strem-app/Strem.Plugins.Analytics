@@ -9,7 +9,6 @@ using Strem.Plugins.Analytics.Models;
 using Strem.Plugins.Analytics.Services.Repositories;
 using Strem.Plugins.Analytics.Twitch.Types;
 using Strem.Plugins.Analytics.Twitch.Variables;
-using Strem.Plugins.Analytics.Types;
 using Strem.Twitch.Extensions;
 using Strem.Twitch.Services.Client;
 using TwitchLib.Api.Interfaces;
@@ -67,7 +66,11 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         TwitchClient.OnUserJoined
             .Subscribe(TrackJoiningMetric)
             .AddTo(_subs);
-
+        
+        TwitchClient.OnRaidNotification
+            .Subscribe(TrackRaidingMetric)
+            .AddTo(_subs);
+        
         TwitchClient.OnUserLeft
             .Subscribe(TrackLeftMetric)
             .AddTo(_subs);
@@ -158,6 +161,25 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         
         AnalyticsEventRepository.Create(interaction.Id, interaction);
     }
+    
+    private void TrackRaidingMetric(OnRaidNotificationArgs args)
+    {
+        if (!MatchesAnalyticsChannels(args.Channel)) { return; }
+        int.TryParse(args.RaidNotification.MsgParamViewerCount, out var raiderCount);
+        
+        var interaction = new AnalyticsEvent
+        {
+            EventType = TwitchAnalyticEventTypes.Raid,
+            SourceContext = args.Channel,
+            PlatformContext = TwitchPlatformContext,
+            UserContext = args.RaidNotification.DisplayName,
+            EventValue = raiderCount,
+            EventDateTime = DateTime.Now,
+            Metadata = new Dictionary<string, string>() {}
+        };
+        
+        AnalyticsEventRepository.Create(interaction.Id, interaction);
+    }
 
     private void TrackNewSubscriptionMetric(OnNewSubscriberArgs args)
     {
@@ -174,7 +196,8 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             Metadata = new Dictionary<string, string>()
             {
                 { "subs-to-date", args.Subscriber.MsgParamCumulativeMonths },
-                { "sub-type", args.Subscriber.SubscriptionPlanName }
+                { "sub-plan", args.Subscriber.SubscriptionPlanName },
+                { "sub-type", args.Subscriber.SubscriptionPlan.ToString() }
             }
         };
         
@@ -196,7 +219,8 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             Metadata = new Dictionary<string, string>()
             {
                 { "subs-to-date",  args.ReSubscriber.MsgParamCumulativeMonths },
-                { "sub-type",  args.ReSubscriber.SubscriptionPlanName }
+                { "sub-plan", args.ReSubscriber.SubscriptionPlanName },
+                { "sub-type", args.ReSubscriber.SubscriptionPlan.ToString() }
             }
         };
         
@@ -218,7 +242,8 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             EventDateTime = DateTime.Now,
             Metadata = new Dictionary<string, string>()
             {
-                { "sub-type",  args.GiftedSubscription.MsgParamSubPlanName },
+                { "sub-plan", args.GiftedSubscription.MsgParamSubPlanName },
+                { "sub-type", args.GiftedSubscription.MsgParamSubPlan.ToString() },
                 { "gifter", args.GiftedSubscription.DisplayName }
             }
         };
