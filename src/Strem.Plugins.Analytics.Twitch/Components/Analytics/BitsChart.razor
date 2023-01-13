@@ -21,7 +21,7 @@ else
                     Stroke="@(new SeriesStroke { Color = CommonFieldColours.CurrencyFieldColour })"
                     OrderBy="x => x.X"/>
         
-        <ApexPointSeries TItem="BitsChartMetrics" Items="metrics" Name="Viewer Count" ShowDataLabels="true"
+        <ApexPointSeries TItem="BitsChartMetrics" Items="metrics" Name="Viewer Count"
                     SeriesType="SeriesType.Line" XValue="@(e => e.Date)" YValue="@(e => e.Viewers)"
                     Stroke="@(new SeriesStroke { Width = 2, Color = CommonFieldColours.ViewerFieldColour })"
                     OrderBy="x => x.X"/>

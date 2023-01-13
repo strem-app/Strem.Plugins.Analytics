@@ -16,19 +16,19 @@ else
     <ApexChart TItem="CategoryChartMetric" Title="Top 10 Categories" @ref="ChartInstance" Options="ChartOptions" Width="500" Height="300">
     
         <ApexPointSeries TItem="CategoryChartMetric" Items="metrics" Name="Viewer Count" 
-                         SeriesType="SeriesType.Bar" ShowDataLabels="true"
+                         SeriesType="SeriesType.Bar"
                          Stroke="@(new SeriesStroke { Color = CommonFieldColours.ViewerFieldColour })"
                          XValue="@(e => e.Category)"
                          YValue="@(e => e.Viewers)"/>    
         
         <ApexPointSeries TItem="CategoryChartMetric" Items="metrics" Name="Total Messages" 
-                         SeriesType="SeriesType.Bar" ShowDataLabels="true"
+                         SeriesType="SeriesType.Bar"
                          Stroke="@(new SeriesStroke { Color = CommonFieldColours.ChatMessagesColour })"
                          XValue="@(e => e.Category)"
                          YValue="@(e => e.ChatCount)"/>
         
         <ApexPointSeries TItem="CategoryChartMetric" Items="metrics" Name="Profitability" 
-                         SeriesType="SeriesType.Bar" ShowDataLabels="true"
+                         SeriesType="SeriesType.Bar"
                          Stroke="@(new SeriesStroke { Color = CommonFieldColours.CurrencyFieldColour })"
                          XValue="@(e => e.Category)"
                          YValue="@(e => e.Bits + (e.Subs * 300))"/>
@@ -70,6 +70,7 @@ else
     {
         return AnalyticsEventRepository
             .Query(new GetTopCategoriesQuery(Filter))
+            .OrderByDescending(x => x.Viewers)
             .ToArray();
     }
     
