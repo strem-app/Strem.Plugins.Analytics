@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Strem.Plugins.Analytics.Models;
 using Strem.Plugins.Analytics.Models.Filtering;
+using Strem.Plugins.Analytics.Services.Repositories;
 
 namespace Strem.Plugins.Analytics.Components;
 
 public class AnalyticsComponent : ComponentBase
 {
-    [Parameter]
-    public IReadOnlyCollection<AnalyticsEvent> Data { get; set; }
+    [Inject]
+    public IAnalyticsEventRepository AnalyticsEventRepository { get; set; }
     
     [Parameter]
     public AnalyticsFilter Filter { get; set; }

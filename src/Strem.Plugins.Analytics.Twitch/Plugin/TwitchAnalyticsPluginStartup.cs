@@ -19,6 +19,7 @@ namespace Strem.Plugins.Analytics.Twitch.Plugin;
 public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
 {
     public const string TwitchPlatformContext = "twitch"; 
+    public const string OfflineString = "offline"; 
     
     private CompositeDisposable _subs = new();
     
@@ -30,6 +31,7 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
     public IAnalyticsEventRepository AnalyticsEventRepository { get; }
     
     public string[] RequiredConfigurationKeys { get; } = Array.Empty<string>();
+    public Dictionary<string, StreamDataCache> StreamMetadataCache { get; } = new Dictionary<string, StreamDataCache>();
 
     public TwitchAnalyticsPluginStartup(IEventBus eventBus, IAppState appState, ILogger<TwitchAnalyticsPluginStartup> logger, IObservableTwitchClient twitchClient, ITwitchAPI twitchApiClient, IAnalyticsEventRepository analyticsEventRepository)
     {
@@ -85,7 +87,8 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             .AddTo(_subs);
         
         JoinRequiredChannels();
-
+        TrackViewerMetrics();
+        
         Logger.Information("Finished Twitch Analytics Tracking Setup");
     }
     
@@ -100,6 +103,13 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         int.TryParse(monthsString, out var numberOfMonths);
         if (numberOfMonths == 0) { numberOfMonths = 1; }
         return numberOfMonths;
+    }
+
+    public StreamDataCache GetChannelData(string channel)
+    {
+        if (StreamMetadataCache.ContainsKey(channel))
+        { return StreamMetadataCache[channel]; }
+        return new StreamDataCache(OfflineString, string.Empty);
     }
     
     public void JoinRequiredChannels()
@@ -125,12 +135,18 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         
         var analyticsChannel = AppState.AppVariables.Get(TwitchAnalyticsViewerVars.Channels);
         var streamInfo = await TwitchApiClient.Helix.Streams.GetStreamsAsync(userLogins: new List<string>() { analyticsChannel });
-        if(streamInfo.Streams.Length == 0) { return; }
+        if (streamInfo.Streams.Length == 0)
+        {
+            StreamMetadataCache[analyticsChannel] = new StreamDataCache(OfflineString, string.Empty);
+            return;
+        }
 
         var stream = streamInfo.Streams[0];
+        
+        StreamMetadataCache[analyticsChannel] = new StreamDataCache(stream.GameName, stream.Title);
         var metric = new AnalyticsEvent()
         {
-            EventType = TwitchAnalyticEventTypes.ViewerCount,
+            EventType = TwitchAnalyticsEventTypes.ViewerCount,
             EventDateTime = DateTime.Now,
             EventValue = stream.ViewerCount,
             SourceContext = stream.UserName,
@@ -148,15 +164,20 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
     private void TrackJoiningMetric(OnUserJoinedArgs args)
     {
         if (!MatchesAnalyticsChannels(args.Channel)) { return; }
-        
+
+        var streamMetadata = GetChannelData(args.Channel);
         var interaction = new AnalyticsEvent
         {
-            EventType = TwitchAnalyticEventTypes.UserJoined,
+            EventType = TwitchAnalyticsEventTypes.UserJoined,
             SourceContext = args.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.Username,
             EventDateTime = DateTime.Now,
-            Metadata = new Dictionary<string, string>() {}
+            Metadata = new Dictionary<string, string>()
+            {
+                { "category", streamMetadata.Category },
+                { "title", streamMetadata.Title }
+            }
         };
         
         AnalyticsEventRepository.Create(interaction.Id, interaction);
@@ -167,15 +188,20 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
         if (!MatchesAnalyticsChannels(args.Channel)) { return; }
         int.TryParse(args.RaidNotification.MsgParamViewerCount, out var raiderCount);
         
+        var streamMetadata = GetChannelData(args.Channel);
         var interaction = new AnalyticsEvent
         {
-            EventType = TwitchAnalyticEventTypes.Raid,
+            EventType = TwitchAnalyticsEventTypes.Raid,
             SourceContext = args.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.RaidNotification.DisplayName,
             EventValue = raiderCount,
             EventDateTime = DateTime.Now,
-            Metadata = new Dictionary<string, string>() {}
+            Metadata = new Dictionary<string, string>()
+            {
+                { "category", streamMetadata.Category },
+                { "title", streamMetadata.Title }
+            }
         };
         
         AnalyticsEventRepository.Create(interaction.Id, interaction);
@@ -185,9 +211,10 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
     {
         if (!MatchesAnalyticsChannels(args.Channel)) { return; }
 
+        var streamMetadata = GetChannelData(args.Channel);
         var metric = new AnalyticsEvent
         {
-            EventType = TwitchAnalyticEventTypes.Subscriptions,
+            EventType = TwitchAnalyticsEventTypes.Subscriptions,
             SourceContext = args.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.Subscriber.DisplayName,
@@ -197,7 +224,9 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             {
                 { "subs-to-date", args.Subscriber.MsgParamCumulativeMonths },
                 { "sub-plan", args.Subscriber.SubscriptionPlanName },
-                { "sub-type", args.Subscriber.SubscriptionPlan.ToString() }
+                { "sub-type", args.Subscriber.SubscriptionPlan.ToString() },
+                { "category", streamMetadata.Category },
+                { "title", streamMetadata.Title }
             }
         };
         
@@ -208,9 +237,10 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
     {
         if (!MatchesAnalyticsChannels(args.Channel)) { return; }
         
+        var streamMetadata = GetChannelData(args.Channel);
         var metric = new AnalyticsEvent
         {
-            EventType = TwitchAnalyticEventTypes.Subscriptions,
+            EventType = TwitchAnalyticsEventTypes.Subscriptions,
             SourceContext = args.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.ReSubscriber.DisplayName,
@@ -220,7 +250,9 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             {
                 { "subs-to-date",  args.ReSubscriber.MsgParamCumulativeMonths },
                 { "sub-plan", args.ReSubscriber.SubscriptionPlanName },
-                { "sub-type", args.ReSubscriber.SubscriptionPlan.ToString() }
+                { "sub-type", args.ReSubscriber.SubscriptionPlan.ToString() },
+                { "category", streamMetadata.Category },
+                { "title", streamMetadata.Title }
             }
         };
         
@@ -231,10 +263,11 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
     {
         if (!MatchesAnalyticsChannels(args.Channel)) { return; }
         
+        var streamMetadata = GetChannelData(args.Channel);
         var numberOfMonths = GetMonthsFromString(args.GiftedSubscription.MsgParamMultiMonthGiftDuration);
         var metric = new AnalyticsEvent
         {
-            EventType = TwitchAnalyticEventTypes.Subscriptions,
+            EventType = TwitchAnalyticsEventTypes.Subscriptions,
             SourceContext = args.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.GiftedSubscription.MsgParamRecipientUserName,
@@ -244,7 +277,9 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             {
                 { "sub-plan", args.GiftedSubscription.MsgParamSubPlanName },
                 { "sub-type", args.GiftedSubscription.MsgParamSubPlan.ToString() },
-                { "gifter", args.GiftedSubscription.DisplayName }
+                { "gifter", args.GiftedSubscription.DisplayName },
+                { "category", streamMetadata.Category },
+                { "title", streamMetadata.Title }
             }
         };
         
@@ -254,15 +289,20 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
     private void TrackLeftMetric(OnUserLeftArgs args)
     {
         if (!MatchesAnalyticsChannels(args.Channel)) { return; }
+        var streamMetadata = GetChannelData(args.Channel);
         
         var interaction = new AnalyticsEvent
         {
-            EventType = TwitchAnalyticEventTypes.UserLeft,
+            EventType = TwitchAnalyticsEventTypes.UserLeft,
             SourceContext = args.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.Username,
             EventDateTime = DateTime.Now,
-            Metadata = new Dictionary<string, string>(){}
+            Metadata = new Dictionary<string, string>()
+            {
+                { "category", streamMetadata.Category },
+                { "title", streamMetadata.Title }
+            }
         };
         
         AnalyticsEventRepository.Create(interaction.Id, interaction);
@@ -272,14 +312,19 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
     {
         if (!MatchesAnalyticsChannels(args.ChatMessage.Channel)) { return; }
         
+        var streamMetadata = GetChannelData(args.ChatMessage.Channel);
         var interaction = new AnalyticsEvent
         {
-            EventType = TwitchAnalyticEventTypes.ChatMessage,
+            EventType = TwitchAnalyticsEventTypes.ChatMessage,
             SourceContext = args.ChatMessage.Channel,
             PlatformContext = TwitchPlatformContext,
             UserContext = args.ChatMessage.Username,
             EventDateTime = DateTime.Now,
-            Metadata = new Dictionary<string, string>() { }
+            Metadata = new Dictionary<string, string>()
+            {
+                { "category", streamMetadata.Category },
+                { "title", streamMetadata.Title }
+            }
         };
         AnalyticsEventRepository.Create(interaction.Id, interaction);
 
@@ -288,13 +333,17 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
 
         var metric = new AnalyticsEvent
         {
-            EventType = TwitchAnalyticEventTypes.Bits,
+            EventType = TwitchAnalyticsEventTypes.Bits,
             UserContext = args.ChatMessage.Username,
             PlatformContext = TwitchPlatformContext,
             SourceContext = args.ChatMessage.Channel,
             EventValue = args.ChatMessage.Bits,
             EventDateTime = DateTime.Now,
-            Metadata = new Dictionary<string, string>() { }
+            Metadata = new Dictionary<string, string>()
+            {
+                { "category", streamMetadata.Category },
+                { "title", streamMetadata.Title }
+            }
         };
         AnalyticsEventRepository.Create(metric.Id, metric);
     }

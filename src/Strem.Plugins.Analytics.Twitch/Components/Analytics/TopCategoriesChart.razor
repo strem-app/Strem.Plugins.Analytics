@@ -1,43 +1,46 @@
 ﻿@using ApexCharts
-@using Strem.Plugins.Analytics.Extensions
-@using Strem.Plugins.Analytics.Twitch.Types
+@using Strem.Plugins.Analytics.Twitch.Models
+@using Strem.Plugins.Analytics.Twitch.Queries
+@using Strem.Plugins.Analytics.Viewer.Types
 
 @inherits Strem.Plugins.Analytics.Viewer.Components.ChartComponent
 
 <h3 class="title is-5 is-capitalized has-text-black">Top Categories</h3>
-@if (Data.Count == 0)
+@{ var metrics = GetMetrics(); }
+@if (metrics.Count == 0)
 {
     <p>No Data Available</p>
 }
 else
 {
-    <ApexChart TItem="CategoryMetric" Title="Top 10 Categories" @ref="ChartInstance" Options="ChartOptions" Width="500" Height="300">
+    <ApexChart TItem="CategoryChartMetric" Title="Top 10 Categories" @ref="ChartInstance" Options="ChartOptions" Width="500" Height="300">
     
-        @{ var metrics = GetMetrics().ToArray(); }
-        <ApexPointSeries TItem="CategoryMetric" Items="metrics" Name="Viewer Count" 
-                         SeriesType="SeriesType.Bar" 
-                         XValue="@(e => e.Key)"
+        <ApexPointSeries TItem="CategoryChartMetric" Items="metrics" Name="Viewer Count" 
+                         SeriesType="SeriesType.Bar" ShowDataLabels="true"
+                         Stroke="@(new SeriesStroke { Color = CommonFieldColours.ViewerFieldColour })"
+                         XValue="@(e => e.Category)"
                          YValue="@(e => e.Viewers)"/>    
         
-        <ApexPointSeries TItem="CategoryMetric" Items="metrics" Name="Total Messages" 
-                         SeriesType="SeriesType.Bar"
-                         XValue="@(e => e.Key)"
+        <ApexPointSeries TItem="CategoryChartMetric" Items="metrics" Name="Total Messages" 
+                         SeriesType="SeriesType.Bar" ShowDataLabels="true"
+                         Stroke="@(new SeriesStroke { Color = CommonFieldColours.ChatMessagesColour })"
+                         XValue="@(e => e.Category)"
                          YValue="@(e => e.ChatCount)"/>
         
-        <ApexPointSeries TItem="CategoryMetric" Items="metrics" Name="Profitability" 
-                         SeriesType="SeriesType.Bar"
-                         XValue="@(e => e.Key)"
-                         YValue="@(e => e.Profitability)"/>
+        <ApexPointSeries TItem="CategoryChartMetric" Items="metrics" Name="Profitability" 
+                         SeriesType="SeriesType.Bar" ShowDataLabels="true"
+                         Stroke="@(new SeriesStroke { Color = CommonFieldColours.CurrencyFieldColour })"
+                         XValue="@(e => e.Category)"
+                         YValue="@(e => e.Bits + (e.Subs * 300))"/>
     
     </ApexChart>
 }
 
 @code {
     
-    public record CategoryMetric(string Key, int Viewers, int ChatCount, int Profitability);
     
-    public ApexChart<CategoryMetric> ChartInstance { get; set; }
-    public ApexChartOptions<CategoryMetric> ChartOptions { get; set; } = new();
+    public ApexChart<CategoryChartMetric> ChartInstance { get; set; }
+    public ApexChartOptions<CategoryChartMetric> ChartOptions { get; set; } = new();
 
     protected override void OnInitialized()
     {
@@ -63,46 +66,11 @@ else
         base.OnInitialized();
     }
     
-    public IEnumerable<CategoryMetric> GetMetrics()
+    public IReadOnlyCollection<CategoryChartMetric> GetMetrics()
     {
-        return Data
-            .Where(x => x.EventType == TwitchAnalyticEventTypes.ViewerCount)
-            .GroupBy(x =>
-            {
-                if (x.Metadata?.ContainsKey("category") ?? false)
-                {
-                    return x.Metadata["category"];
-                }
-                return "Unknown";
-            })
-            .Select(x =>
-            {
-                return
-                    (
-                        Category: x.Key,
-                            Viewers: x?.DefaultIfEmpty().Average(y => y.EventValue) ?? 0,
-                            DateRanges: x?
-                                .GroupBy(y => y.EventDateTime.RoundToNearest(Filter.TimeUnitRounding))
-                                .Select(y => y.Key) ?? Array.Empty<DateTime>()
-                        );
-            })
-            .OrderByDescending(x => x.Viewers)
-            .Take(10)
-            .Select(x =>
-            {
-                var incomeWithinPeriods = Data
-                    .Where(y =>
-                        (y.EventType == TwitchAnalyticEventTypes.Bits || y.EventType == TwitchAnalyticEventTypes.Subscriptions) &&
-                        x.DateRanges.Contains(y.EventDateTime.RoundToNearest(Filter.TimeUnitRounding)))
-                    .Sum(y => y.EventType == TwitchAnalyticEventTypes.Bits ? y.EventValue : y.EventValue * 300);
-
-                var chatInPeriod = Data
-                    .Count(y =>
-                        y.EventType == TwitchAnalyticEventTypes.ChatMessage && 
-                        x.DateRanges.Contains(y.EventDateTime.RoundToNearest(Filter.TimeUnitRounding)));
-
-                return new CategoryMetric(x.Category, (int)x.Viewers, chatInPeriod, (int)incomeWithinPeriods);
-            });
+        return AnalyticsEventRepository
+            .Query(new GetTopCategoriesQuery(Filter))
+            .ToArray();
     }
     
     public override async Task Refresh()
