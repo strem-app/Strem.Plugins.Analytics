@@ -22,8 +22,4 @@
       <ProjectReference Include="..\Strem.Plugins.Analytics\Strem.Plugins.Analytics.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Services\Metrics\General" />
-    </ItemGroup>
-
 </Project>
