@@ -1,11 +1,12 @@
 ﻿@using Strem.Plugins.Analytics.Models.Filtering
-@using Strem.Plugins.Analytics.Types
+@using Strem.Plugins.Analytics.Viewer.Queries
+@using Strem.Plugins.Analytics.Viewer.Types
 
 @inherits ChartComponent
 
 <h3 class="title is-5 is-capitalized has-text-black">Top Chatters Chart</h3>
-@{ var metricData = GenerateMetrics().ToArray(); }
-@if (metricData.Length == 0)
+@{ var metrics = GenerateMetrics(); }
+@if (metrics.Count == 0)
 {
     <p>No Data Available</p>
 }
@@ -13,11 +14,11 @@ else
 {
     <ApexChart TItem="KeyedMetric" Title="Top 10 Chatters" @ref="ChartInstance" Options="ChartOptions" Width="500" Height="300">
         
-        <ApexPointSeries TItem="KeyedMetric" Items="metricData" Name="Chatters"
+        <ApexPointSeries TItem="KeyedMetric" Items="metrics" Name="Chatters"
                          SeriesType="SeriesType.Bar" ShowDataLabels="true"
+                         Stroke="@(new SeriesStroke { Color = CommonFieldColours.ChatMessagesColour })"
                          XValue="@(e => e.Key)"
-                         YValue="@(e => e.Value)"
-                         OrderByDescending="x => x.Y"/>
+                         YValue="@(e => e.Value)"/>
     
     </ApexChart>
 }
@@ -27,14 +28,13 @@ else
     public ApexChart<KeyedMetric> ChartInstance { get; set; }
     public ApexChartOptions<KeyedMetric> ChartOptions { get; set; } = new();
     
-    public IEnumerable<KeyedMetric> GenerateMetrics(int count = 10)
+    public IReadOnlyCollection<KeyedMetric> GenerateMetrics(int count = 10)
     {
-        return Data
-            .Where(x => x.EventType == AnalyticsEventTypes.ChatMessage)
-            .GroupBy(x => x.UserContext)
-            .Select(x => new KeyedMetric(x.First().UserContext, x.Count()))
+        return AnalyticsEventRepository
+            .Query(new GetTopChattersQuery(Filter))
             .OrderByDescending(x => x.Value)
-            .Take(count);
+            .Take(count)
+            .ToArray();
     }
 
     public override async Task Refresh()

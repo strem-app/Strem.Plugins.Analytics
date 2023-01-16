@@ -2,7 +2,7 @@
 
 namespace Strem.Plugins.Analytics.Twitch.Types;
 
-public class TwitchAnalyticEventTypes : AnalyticsEventTypes
+public class TwitchAnalyticsEventTypes : AnalyticsEventTypes
 {
     public static readonly string Subscriptions = "subscriptions";
     public static readonly string Raid = "raid";

@@ -11,18 +11,14 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <PackageReference Include="Blazor-ApexCharts" Version="0.9.16-beta" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.8" />       
-        <PackageReference Include="Strem.Infrastructure" Version="0.7.215" />
+        <PackageReference Include="Blazor-ApexCharts" Version="0.9.17-beta" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.8" />
+        <PackageReference Include="Strem.Flows" Version="0.7.218" />       
+        <PackageReference Include="Strem.Infrastructure" Version="0.7.218" />
     </ItemGroup>
     
     <ItemGroup>
       <ProjectReference Include="..\Strem.Plugins.Analytics\Strem.Plugins.Analytics.csproj" />
-    </ItemGroup>
-    
-    <ItemGroup>
-      <Folder Include="Extensions" />
-      <Folder Include="Models" />
     </ItemGroup>
 
 </Project>

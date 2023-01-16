@@ -10,7 +10,6 @@
 @using Strem.Plugins.Analytics.Models.Filtering
 @using Strem.Plugins.Analytics.Services.Metrics
 @using Strem.Plugins.Analytics.Services.Repositories
-@using Strem.Plugins.Analytics.Services.Repositories.Queries
 
 @inject IJSRuntime JS
 @inject IAppState AppState
@@ -102,17 +101,10 @@
                                 .Where(x => IsComponentActive(x.Code))
                                 .ToArray();
 
-                            Dictionary<string, object> componentProps = null;
-                            
-                            if (applicableComponents.Length > 0)
+                            Dictionary<string, object> componentProps = new()
                             {
-                                var filteredData = FilterData();
-                                componentProps = new()
-                                {
-                                    { "Data", filteredData },
-                                    { "Filter", Filter },
-                                };
-                            }
+                                { "Filter", Filter },
+                            };
                         }
                         
                         @foreach (var component in applicableComponents)
@@ -184,9 +176,6 @@
 
     public bool IsChartComponent(Type componentType)
     { return componentType.IsSubclassOf(typeof(ChartComponent));}
-
-    public IReadOnlyCollection<AnalyticsEvent> FilterData()
-    { return AnalyticsRepository.Query(new GetAnalyticsEventsQuery(Filter)).ToArray(); }
 
     public async Task RefreshComponents()
     {

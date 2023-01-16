@@ -11,8 +11,9 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.8" />       
-        <PackageReference Include="Strem.Infrastructure" Version="0.7.215" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.8" />
+        <PackageReference Include="Strem.Flows" Version="0.7.218" />       
+        <PackageReference Include="Strem.Infrastructure" Version="0.7.218" />
     </ItemGroup>
     
     <ItemGroup>

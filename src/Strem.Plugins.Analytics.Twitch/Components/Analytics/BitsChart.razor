@@ -1,35 +1,38 @@
-﻿@using Strem.Plugins.Analytics.Models
+﻿@using ApexCharts
 @using Strem.Plugins.Analytics.Extensions
-@using ApexCharts
-@using Strem.Plugins.Analytics.Models.Filtering
-@using Strem.Plugins.Analytics.Twitch.Types
+@using Strem.Plugins.Analytics.Twitch.Models
+@using Strem.Plugins.Analytics.Twitch.Queries
+@using Strem.Plugins.Analytics.Viewer.Types
 
 @inherits Strem.Plugins.Analytics.Viewer.Components.ChartComponent
 
 <h3 class="title is-5 is-capitalized has-text-black">Bits Chart</h3>
-@if (Data.Count == 0)
+@{ var metrics = GetMetrics(); }
+@if (metrics.Count == 0)
 {
     <p>No Data Available</p>
 }
 else
 {
-    <ApexChart TItem="TimedMetric" Title="Bits Chart" @ref="ChartInstance" Options="ChartOptions" Width="500" Height="300">
+    <ApexChart TItem="BitsChartMetrics" Title="Bits Chart" @ref="ChartInstance" Options="ChartOptions" Width="500" Height="300">
     
-        <ApexPointSeries TItem="TimedMetric" Items="GetBitData()" Name="Bits Spent" 
-              SeriesType="SeriesType.Bar" XValue="@(e => e.Date)" YValue="@(e => e.Value)" 
-              OrderBy="x => x.X"/>
+        <ApexPointSeries TItem="BitsChartMetrics" Items="metrics" Name="Bits Spent" 
+                    SeriesType="SeriesType.Bar" XValue="@(e => e.Date)" YValue="@(e => e.Bits)"
+                    Stroke="@(new SeriesStroke { Color = CommonFieldColours.CurrencyFieldColour })"
+                    OrderBy="x => x.X"/>
         
-        <ApexPointSeries TItem="TimedMetric" Items="GetViewerData()" Name="Viewer Count" 
-              SeriesType="SeriesType.Bar" XValue="@(e => e.Date)" YValue="@(e => e.Value)" 
-              OrderBy="x => x.X"/>
+        <ApexPointSeries TItem="BitsChartMetrics" Items="metrics" Name="Viewer Count"
+                    SeriesType="SeriesType.Line" XValue="@(e => e.Date)" YValue="@(e => e.Viewers)"
+                    Stroke="@(new SeriesStroke { Width = 2, Color = CommonFieldColours.ViewerFieldColour })"
+                    OrderBy="x => x.X"/>
     
     </ApexChart>
 }
 
 @code {
     
-    public ApexChart<TimedMetric> ChartInstance { get; set; }
-    public ApexChartOptions<TimedMetric> ChartOptions { get; set; } = new();
+    public ApexChart<BitsChartMetrics> ChartInstance { get; set; }
+    public ApexChartOptions<BitsChartMetrics> ChartOptions { get; set; } = new();
 
     protected override void OnInitialized()
     {
@@ -55,18 +58,15 @@ else
         base.OnInitialized();
     }
 
-    public IEnumerable<TimedMetric> GetBitData()
+    public IReadOnlyCollection<BitsChartMetrics> GetMetrics()
     {
-        return Data.Where(x => x.EventType == TwitchAnalyticEventTypes.Bits)
-            .GroupBy(x => x.EventDateTime.RoundToNearest(Filter.TimeUnitRounding))
-            .Select(x => new TimedMetric(x.Key, x.Sum(y => y.EventValue)));
-    }
-    
-    public IEnumerable<TimedMetric> GetViewerData()
-    {
-        return Data.Where(x => x.EventType == TwitchAnalyticEventTypes.ViewerCount)
-            .GroupBy(x => x.EventDateTime.RoundToNearest(Filter.TimeUnitRounding))
-            .Select(x => new TimedMetric(x.Key, x.Average(y => y.EventValue)));
+        return AnalyticsEventRepository
+            .Query(new GetBitChartDataQuery(Filter))
+            .GroupBy(x => x.Date.RoundToNearest(Filter.TimeUnitRounding))
+            .Select(x => new BitsChartMetrics(x.Key,
+                (int)x.Average(y => y.Viewers),
+                x.Sum(y => y.Bits)))
+            .ToArray();
     }
     
     public override async Task Refresh()

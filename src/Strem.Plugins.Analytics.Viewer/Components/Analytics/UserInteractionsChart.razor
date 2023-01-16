@@ -1,11 +1,15 @@
-﻿@using Strem.Plugins.Analytics.Models
-@using Strem.Plugins.Analytics.Types
+﻿@using Strem.Plugins.Analytics.Types
+@using Strem.Plugins.Analytics.Viewer.Models
+@using Strem.Plugins.Analytics.Viewer.Queries
+@using Strem.Core.Extensions
 @using Strem.Plugins.Analytics.Extensions
 @using Strem.Plugins.Analytics.Models.Filtering
+@using Strem.Plugins.Analytics.Viewer.Types
 
 @inherits ChartComponent
 
 <h3 class="title is-5 is-capitalized has-text-black">User Interactions Chart</h3>
+@{ var Data = GetMetrics(); }
 @if (Data.Count == 0)
 {
     <p>No Data Available</p>
@@ -14,26 +18,24 @@ else
 {
     <ApexChart TItem="InteractionMetric" Title="User Interactions" @ref="ChartInstance" Options="ChartOptions" Width="500" Height="300">
     
-        @{ var metrics = GetMetrics().ToArray(); }
-        
         <ApexPointSeries TItem="InteractionMetric" Name="Chat Messages"
-                         Items="metrics"
+                         Items="Data" Stroke="@(new SeriesStroke { Width = 2, Color = CommonFieldColours.ChatMessagesColour })"
                          SeriesType="SeriesType.Line" XValue="@(e => e.Date)" YValue="@(e => e.ChatCount)" 
                          OrderBy="x => x.X"/>
         
         <ApexPointSeries TItem="InteractionMetric" Name="Users Joined"
-                         Items="metrics"
+                         Items="Data" Stroke="@(new SeriesStroke { Width = 2, Color = CommonFieldColours.Other1 })"
                          SeriesType="SeriesType.Line" XValue="@(e => e.Date)" YValue="@(e => e.UsersJoined)" 
                          OrderBy="x => x.X"/>
         
         <ApexPointSeries TItem="InteractionMetric" Name="Users Left"
-                         Items="metrics"
+                         Items="Data" Stroke="@(new SeriesStroke { Width = 2, Color = CommonFieldColours.Other2 })"
                          SeriesType="SeriesType.Line" XValue="@(e => e.Date)" YValue="@(e => e.UsersLeft)" 
                          OrderBy="x => x.X"/>
         
         
         <ApexPointSeries TItem="InteractionMetric" Name="Viewer Count" 
-                         Items="metrics" 
+                         Items="Data" Stroke="@(new SeriesStroke { Width = 2, Color = CommonFieldColours.ViewerFieldColour })"
                          SeriesType="SeriesType.Line" XValue="@(e => e.Date)" YValue="@(e => e.Viewers)" 
                          OrderBy="x => x.X"/>
     
@@ -42,7 +44,6 @@ else
 
 @code {
     
-    public record InteractionMetric(DateTime Date, int Viewers, int ChatCount, int UsersJoined, int UsersLeft);
     
     public ApexChart<InteractionMetric> ChartInstance { get; set; }
     public ApexChartOptions<InteractionMetric> ChartOptions { get; set; } = new();
@@ -86,28 +87,18 @@ else
         base.OnInitialized();
     }
 
-    public IEnumerable<InteractionMetric> GetMetrics()
+    public IReadOnlyCollection<InteractionMetric> GetMetrics()
     {
-        return Data
-            .Where(x => 
-                x.EventType == AnalyticsEventTypes.ChatMessage ||
-                x.EventType == AnalyticsEventTypes.UserJoined ||
-                x.EventType == AnalyticsEventTypes.UserLeft ||
-                x.EventType == AnalyticsEventTypes.ViewerCount)
-            .GroupBy(x => x.EventDateTime.RoundToNearest(Filter.TimeUnitRounding))
-            .Select(x =>
-            {
-                var viewerCount = x?
-                    .Where(y => y.EventType == AnalyticsEventTypes.ViewerCount)
-                    .DefaultIfEmpty()
-                    .Average(y => y?.EventValue ?? 0) ?? 0;
-                
-                var chatCount = x?.Count(y => y.EventType == AnalyticsEventTypes.ChatMessage) ?? 0;
-                var joinCount = x?.Count(y => y.EventType == AnalyticsEventTypes.UserJoined) ?? 0;
-                var leftCount = x?.Count(y => y.EventType == AnalyticsEventTypes.UserLeft) ?? 0;
-                
-                return new InteractionMetric(x.Key, (int)viewerCount, chatCount, joinCount, leftCount);
-            });
+        return AnalyticsEventRepository
+            .Query(new GetUserInteractionQuery(Filter))
+            .GroupBy(x => x.Date.RoundToNearest(Filter.TimeUnitRounding))
+            .Select(x => new InteractionMetric(x.Key, 
+                    (int)x.Average(y => y.Viewers), 
+                    x.Sum(y => y.ChatCount), 
+                    x.Sum(y => y.UsersJoined),
+                    x.Sum(y => y.UsersLeft)
+                ))
+            .ToArray();
     }
     
     public override async Task Refresh()
