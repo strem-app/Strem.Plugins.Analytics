@@ -37,8 +37,6 @@ else
 }
 
 @code {
-    
-    
     public ApexChart<CategoryChartMetric> ChartInstance { get; set; }
     public ApexChartOptions<CategoryChartMetric> ChartOptions { get; set; } = new();
 
@@ -66,11 +64,12 @@ else
         base.OnInitialized();
     }
     
-    public IReadOnlyCollection<CategoryChartMetric> GetMetrics()
+    public IReadOnlyCollection<CategoryChartMetric> GetMetrics(int count = 10)
     {
         return AnalyticsEventRepository
             .Query(new GetTopCategoriesQuery(Filter))
             .OrderByDescending(x => x.Viewers)
+            .Take(count)
             .ToArray();
     }
     
