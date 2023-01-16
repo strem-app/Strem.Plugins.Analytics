@@ -32,7 +32,6 @@ public class GetTopChattersQuery : IRawQuery<IEnumerable<KeyedMetric>>
     public IEnumerable<KeyedMetric> Query(ILiteDatabase connection)
     {
         var query = GetFilteredQuery();
-        Console.WriteLine(query);
         using var reader = connection.Execute(query);
         return reader
             .ToArray()

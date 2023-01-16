@@ -153,8 +153,8 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             PlatformContext = TwitchPlatformContext,
             Metadata = new Dictionary<string, string>()
             {
-                { "category", stream.GameName },
-                { "title", stream.Title }
+                { TwitchAnalyticsMetaDataTypes.Category, stream.GameName },
+                { TwitchAnalyticsMetaDataTypes.Title, stream.Title }
             }
         };
         
@@ -175,8 +175,8 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             EventDateTime = DateTime.Now,
             Metadata = new Dictionary<string, string>()
             {
-                { "category", streamMetadata.Category },
-                { "title", streamMetadata.Title }
+                { TwitchAnalyticsMetaDataTypes.Category, streamMetadata.Category },
+                { TwitchAnalyticsMetaDataTypes.Title, streamMetadata.Title }
             }
         };
         
@@ -199,8 +199,8 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             EventDateTime = DateTime.Now,
             Metadata = new Dictionary<string, string>()
             {
-                { "category", streamMetadata.Category },
-                { "title", streamMetadata.Title }
+                { TwitchAnalyticsMetaDataTypes.Category, streamMetadata.Category },
+                { TwitchAnalyticsMetaDataTypes.Title, streamMetadata.Title }
             }
         };
         
@@ -222,11 +222,11 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             EventValue = 1,
             Metadata = new Dictionary<string, string>()
             {
-                { "subs-to-date", args.Subscriber.MsgParamCumulativeMonths },
-                { "sub-plan", args.Subscriber.SubscriptionPlanName },
-                { "sub-type", args.Subscriber.SubscriptionPlan.ToString() },
-                { "category", streamMetadata.Category },
-                { "title", streamMetadata.Title }
+                { TwitchAnalyticsMetaDataTypes.SubsToDate, args.Subscriber.MsgParamCumulativeMonths },
+                { TwitchAnalyticsMetaDataTypes.SubPlan, args.Subscriber.SubscriptionPlanName },
+                { TwitchAnalyticsMetaDataTypes.SubType, args.Subscriber.SubscriptionPlan.ToString() },
+                { TwitchAnalyticsMetaDataTypes.Category, streamMetadata.Category },
+                { TwitchAnalyticsMetaDataTypes.Title, streamMetadata.Title }
             }
         };
         
@@ -248,11 +248,11 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             EventValue = 1,
             Metadata = new Dictionary<string, string>()
             {
-                { "subs-to-date",  args.ReSubscriber.MsgParamCumulativeMonths },
-                { "sub-plan", args.ReSubscriber.SubscriptionPlanName },
-                { "sub-type", args.ReSubscriber.SubscriptionPlan.ToString() },
-                { "category", streamMetadata.Category },
-                { "title", streamMetadata.Title }
+                { TwitchAnalyticsMetaDataTypes.SubsToDate,  args.ReSubscriber.MsgParamCumulativeMonths },
+                { TwitchAnalyticsMetaDataTypes.SubPlan, args.ReSubscriber.SubscriptionPlanName },
+                { TwitchAnalyticsMetaDataTypes.SubType, args.ReSubscriber.SubscriptionPlan.ToString() },
+                { TwitchAnalyticsMetaDataTypes.Category, streamMetadata.Category },
+                { TwitchAnalyticsMetaDataTypes.Title, streamMetadata.Title }
             }
         };
         
@@ -275,11 +275,11 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             EventDateTime = DateTime.Now,
             Metadata = new Dictionary<string, string>()
             {
-                { "sub-plan", args.GiftedSubscription.MsgParamSubPlanName },
-                { "sub-type", args.GiftedSubscription.MsgParamSubPlan.ToString() },
-                { "gifter", args.GiftedSubscription.DisplayName },
-                { "category", streamMetadata.Category },
-                { "title", streamMetadata.Title }
+                { TwitchAnalyticsMetaDataTypes.SubPlan, args.GiftedSubscription.MsgParamSubPlanName },
+                { TwitchAnalyticsMetaDataTypes.SubType, args.GiftedSubscription.MsgParamSubPlan.ToString() },
+                { TwitchAnalyticsMetaDataTypes.Gifter, args.GiftedSubscription.DisplayName },
+                { TwitchAnalyticsMetaDataTypes.Category, streamMetadata.Category },
+                { TwitchAnalyticsMetaDataTypes.Title, streamMetadata.Title }
             }
         };
         
@@ -300,8 +300,8 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             EventDateTime = DateTime.Now,
             Metadata = new Dictionary<string, string>()
             {
-                { "category", streamMetadata.Category },
-                { "title", streamMetadata.Title }
+                { TwitchAnalyticsMetaDataTypes.Category, streamMetadata.Category },
+                { TwitchAnalyticsMetaDataTypes.Title, streamMetadata.Title }
             }
         };
         
@@ -322,8 +322,8 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             EventDateTime = DateTime.Now,
             Metadata = new Dictionary<string, string>()
             {
-                { "category", streamMetadata.Category },
-                { "title", streamMetadata.Title }
+                { TwitchAnalyticsMetaDataTypes.Category, streamMetadata.Category },
+                { TwitchAnalyticsMetaDataTypes.Title, streamMetadata.Title }
             }
         };
         AnalyticsEventRepository.Create(interaction.Id, interaction);
@@ -341,8 +341,8 @@ public class TwitchAnalyticsPluginStartup : IPluginStartup, IDisposable
             EventDateTime = DateTime.Now,
             Metadata = new Dictionary<string, string>()
             {
-                { "category", streamMetadata.Category },
-                { "title", streamMetadata.Title }
+                { TwitchAnalyticsMetaDataTypes.Category, streamMetadata.Category },
+                { TwitchAnalyticsMetaDataTypes.Title, streamMetadata.Title }
             }
         };
         AnalyticsEventRepository.Create(metric.Id, metric);

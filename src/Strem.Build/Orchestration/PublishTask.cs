@@ -7,6 +7,7 @@ namespace Strem.Build.Orchestration;
 [IsDependentOn(typeof(PackageAnalyticsPluginTask))]
 [IsDependentOn(typeof(PackageAnalyticsTwitchPluginTask))]
 [IsDependentOn(typeof(PackageAnalyticsViewerPluginTask))]
+[IsDependentOn(typeof(PackageLibsTask))]
 public class PublishTask : FrostingTask<BuildContext>
 {
     

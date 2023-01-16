@@ -41,13 +41,12 @@ public class GetTopCategoriesQuery : IRawQuery<IEnumerable<CategoryChartMetric>>
                 $.EventType = '{TwitchAnalyticsEventTypes.ChatMessage}'
             )
             AND {Filter.ToWhereClause()}
-            GROUP BY $.Metadata.category";
+            GROUP BY $.Metadata.{TwitchAnalyticsMetaDataTypes.Category}";
     }
 
     public IEnumerable<CategoryChartMetric> Query(ILiteDatabase connection)
     {
         var query = GetFilteredQuery();
-        Console.WriteLine(query);
         using var reader = connection.Execute(query);
         return reader
             .ToArray()
