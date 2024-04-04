@@ -6,6 +6,8 @@ A plugin for generating analytical data around your streams
 
 ## Installation
 
+> Make sure you have the latest version of [Strem](https://github.com/strem-app/strem) before you proceed.
+
 Go to the latest release, download the latest plugin and extract it into your `Plugins` directory.
 
 ## How To Use?
